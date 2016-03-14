@@ -1,11 +1,30 @@
 /*
-*@expression:css of first page;
+*@expression:css of first/last page;
 *@author:Jellyfish;
 */
 
-#first h1{
-    margin: auto;
-    position: 
+#all h1{
+    width: 60%;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    margin-right: -50%;
+}
+
+/*
+*@expression:css of Jellyfish;
+*@author:Jellyfish;
+*/
+
+#jellyfish h1{
+    margin: 1em auto;
+    text-align: center;
+}
+#jellyfish p{
+    margin-bottom: 1em;
+    line-height: 1.5em;
+    padding: 5px;
 }
 
 /*
@@ -25,6 +44,7 @@
 
 #delain div{
 	position: absolute;
-	left:200px;
+	left:10px;
+    width: 50%;
 	top: 30%;
 }
