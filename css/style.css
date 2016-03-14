@@ -1,7 +1,6 @@
 body{
 	background: url('../images/bg.jpg');
 }
-
 #pageContain{
     overflow: hidden;
 }
@@ -81,4 +80,29 @@ body{
 .allImfor{
 	float: left;
 	width: 500px;
+}
+.page4{
+    height: 100%;
+    text-align: center;
+}
+.page4 i,
+.page4 h2,
+.page4 b{
+    font-weight: normal;
+    font-style: normal;
+}
+.page4 div,
+.page4 b{
+    display: inline-block;
+    vertical-align: middle;
+}
+.page4 b{
+    height: 100%;
+}
+.page4 h2{
+    font-size: 31px;
+    margin-bottom: 10px;
+}
+.page4 i{
+    font-size: 17px;
 }
