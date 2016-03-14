@@ -34,6 +34,7 @@
 *@author:delaincheng;
 */
 
+
 #delain img{
 	position: relative;
 	top: 0;
@@ -49,4 +50,74 @@
 	left:10px;
     width: 50%;
 	top: 30%;
+}
+
+/*
+*@expression:css of page link;
+*@author:kelin;
+*/
+#link {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+#link .infomation{
+    
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width:400px;
+    /*border-radius: 120px;*/
+    border-bottom-right-radius: 120px;
+    border-top-right-radius: 120px;
+    height: 240px;
+    margin-top: -120px;
+    margin-left: -200px;
+    /*background: #6699CC;*/
+    /*overflow: hidden;*/
+}
+
+#link .img{
+    position: absolute;
+    left: -120px;
+    width: 240px;
+    height: 240px; 
+    border-radius: 50%;  
+    background-image: url("../images/link.jpg");
+    /*background-: */
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    border: 5px solid rgba(00, 00, 134, 1);
+    box-sizing:border-box;
+    -webkit-transition: all 1.5 ease;
+    -moz-transition: all 1.5 ease ;
+    transition: all 1.5 ease ;
+}
+#link .img:hover{
+    /*background-size: 90%;*/
+    border: 15px solid rgba(00, 00, 134, 1);
+}
+#link p{
+   text-indent: 55px;
+   padding-left: 60px;
+   margin-right: 50px;
+   display: block;
+   height: 80px;
+   font-size: 16px;
+   font-weight: bold;
+   line-height: 40px;
+   background-color: rgba(00, 00, 134, 0.5);
+   background-clip: content-box;
+   padding-top:20px;
+   padding-bottom: 20px; 
+   border-top-right-radius: 80px;
+   border-bottom-right-radius: 80px;
+   box-sizing: border-box;
+   color: black;
+   letter-spacing: 4px;
+}
+#link p.center{
+    text-indent: 80px;
+    margin-right: 10px;
 }
