@@ -1,0 +1,30 @@
+/*
+*@expression:css of first page;
+*@author:Jellyfish;
+*/
+
+#first h1{
+    margin: auto;
+    position: 
+}
+
+/*
+*@expression:css of Delain;
+*@author:delaincheng;
+*/
+
+#delain img{
+	position: relative;
+	top: 0;
+	bottom: 0;
+	left:50%;
+	margin: auto;
+	border-radius: 50%;
+	box-shadow: 0 0 20px #AAA;
+}
+
+#delain div{
+	position: absolute;
+	left:200px;
+	top: 30%;
+}
