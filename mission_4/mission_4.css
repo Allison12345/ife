@@ -1,0 +1,44 @@
+/*
+*@expression: mission4样式;
+*@author: delaincheng;
+*/
+/* set all */
+*{
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+html,body{
+	height: 100%;
+	width: 100%;
+}
+.wrapper{
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	margin: auto;
+	width: 400px;
+	height: 200px;
+	background-color: #CCC;
+	overflow: hidden;
+}
+.left_top{
+	position: absolute;
+	top: -50px;
+	left: -50px;
+	width: 100px;
+	height: 100px;
+	border-radius: 50%;
+	background-color: #FC0;
+}
+.right_bottom{
+	position: absolute;
+	bottom: -50px;
+	right: -50px;
+	width: 100px;
+	height: 100px;
+	border-radius: 50%;
+	background-color: #FC0;
+}
