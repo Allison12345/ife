@@ -250,6 +250,18 @@ header{
     text-align: left;
     cursor: pointer;
 }
+.search-wrap .search-address{
+    width: 236px;
+    height: 35px;
+    line-height: 35px;
+    color: #fff;
+    word-spacing: 5px;
+    background-color: #be4e48;
+    vertical-align: middle;
+}
+.search-wrap .search-address:hover{
+    background-color: #af3c36;
+}
 .pull div.tri{
     position: absolute;
     height: 18px;
