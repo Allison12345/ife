@@ -3,7 +3,7 @@
 *@author:Jellyfish;
 */
 
-#all h1{
+.all h1 {
     text-align: center;
     position: absolute;
     left: 50%;
@@ -19,11 +19,11 @@
 *@author:Jellyfish;
 */
 
-#jellyfish h1{
+#jellyfish h1 {
     margin: 1em auto;
     text-align: center;
 }
-#jellyfish p{
+#jellyfish p {
     margin-bottom: 1em;
     line-height: 1.5em;
     padding: 5px;
@@ -34,40 +34,65 @@
 *@author:delaincheng;
 */
 
-
-#delain img{
-	position: relative;
-	top: 0;
-	bottom: 0;
-	left:50%;
-	margin: auto;
-	border-radius: 50%;
-	box-shadow: 0 0 20px #AAA;
+#delain img {
+    position: relative;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    margin: auto;
+    border-radius: 50%;
+    box-shadow: 0 0 20px #AAA;
+}
+#delain div {
+    position: absolute;
+    left: 10px;
+    width: 50%;
+    top: 30%;
 }
 
-#delain div{
-	position: absolute;
-	left:10px;
-    width: 50%;
-	top: 30%;
+/*
+*@expression:css of #xing;
+*@author:#xing;
+*/
+
+#xing {
+    height: 100%;
+    text-align: center;
+}
+#xing i, #xing h2, #xing b {
+    font-weight: normal;
+    font-style: normal;
+}
+#xing div, #xing b {
+    display: inline-block;
+    vertical-align: middle;
+}
+#xing b {
+    height: 100%;
+}
+#xing h2 {
+    font-size: 31px;
+    margin-bottom: 10px;
+}
+#xing i {
+    font-size: 17px;
 }
 
 /*
 *@expression:css of page link;
 *@author:kelin;
 */
+
 #link {
     position: relative;
     width: 100%;
     height: 100%;
 }
-
-#link .infomation{
-    
+#link .infomation {
     position: absolute;
     left: 50%;
     top: 50%;
-    width:400px;
+    width: 400px;
     /*border-radius: 120px;*/
     border-bottom-right-radius: 120px;
     border-top-right-radius: 120px;
@@ -77,47 +102,88 @@
     /*background: #6699CC;*/
     /*overflow: hidden;*/
 }
-
-#link .img{
+#link .img {
     position: absolute;
     left: -120px;
     width: 240px;
-    height: 240px; 
-    border-radius: 50%;  
+    height: 240px;
+    border-radius: 50%;
     background-image: url("../images/link.jpg");
     /*background-: */
     background-size: 100% 100%;
     background-repeat: no-repeat;
     border: 5px solid rgba(00, 00, 134, 1);
-    box-sizing:border-box;
+    box-sizing: border-box;
     -webkit-transition: all 1.5 ease;
-    -moz-transition: all 1.5 ease ;
-    transition: all 1.5 ease ;
+    -moz-transition: all 1.5 ease;
+    transition: all 1.5 ease;
 }
-#link .img:hover{
+#link .img:hover {
     /*background-size: 90%;*/
     border: 15px solid rgba(00, 00, 134, 1);
 }
-#link p{
-   text-indent: 55px;
-   padding-left: 60px;
-   margin-right: 50px;
-   display: block;
-   height: 80px;
-   font-size: 16px;
-   font-weight: bold;
-   line-height: 40px;
-   background-color: rgba(00, 00, 134, 0.5);
-   background-clip: content-box;
-   padding-top:20px;
-   padding-bottom: 20px; 
-   border-top-right-radius: 80px;
-   border-bottom-right-radius: 80px;
-   box-sizing: border-box;
-   color: black;
-   letter-spacing: 4px;
+#link p {
+    text-indent: 55px;
+    padding-left: 60px;
+    margin-right: 50px;
+    display: block;
+    height: 80px;
+    font-size: 16px;
+    font-weight: bold;
+    line-height: 40px;
+    background-color: rgba(00, 00, 134, 0.5);
+    background-clip: content-box;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    border-top-right-radius: 80px;
+    border-bottom-right-radius: 80px;
+    box-sizing: border-box;
+    color: black;
+    letter-spacing: 4px;
 }
-#link p.center{
+#link p.center {
     text-indent: 80px;
     margin-right: 10px;
+}
+
+/*
+*@expression:css of pao;
+*@author:pao;
+*/
+
+.profile {
+    margin: 50px auto;
+    width: 900px;
+    position: relative;
+}
+.profile li {
+    list-style: none;
+}
+.profile p {
+    font-size: 30px;
+    font-family: '微软雅黑';
+}
+.profile li ul {
+    margin: 9px 45px;
+    padding: 0;
+    font-size: 18px;
+    font-family: '微软雅黑';
+}
+.profile li li {
+    list-style: circle;
+    line-height: 27px;
+}
+.profile span {
+    display: inline-block;
+    margin: 9px 27px;
+    font-size: 18px;
+    font-family: '微软雅黑';
+}
+.picA {
+    float: right;
+    margin-top: 10px;
+}
+.allImfor {
+    float: left;
+    width: 500px;
 }
