@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>go</title>
+    <style>
+        .boardView{
+            
+        }
+    </style>
+</head>
+<body>
+    <script src="./dist/bundle.js"></script>
+    <script>
+        var board = new Board(15, 10);
+        var robot  = new Robot(5, 7);
+        board.draw(robot);
+        document.body.addChild(board.createView("board"));
+    </script>
+</body>
+</html>
