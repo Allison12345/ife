@@ -2,18 +2,13 @@ var util = require('./util');
 var Pointer = require('./Pointer');
 
 function Direction(angle) {
-    this.angle = Direction.cycle(angle);
+    this.angle = util.cycle(angle);
 }
 
 Direction.EAST = new Direction(0);
 Direction.NORTH = new Direction(90);
 Direction.WEST = new Direction(180);
 Direction.SOUTH = new Direction(270);
-
-Direction.cycle = function(angle) {
-    if (angle >= 0) return angle % 360;
-    else return 360 - (-angle) % 360;
-};
 
 Direction.prototype = {
     getX: function() {
@@ -29,7 +24,14 @@ Direction.prototype = {
         return this.angle / 180 * Math.PI;
     },
     addAngle: function(a){
-        this.angle = Direction.cycle(this.angle + a);
+        this.angle = util.cycle(this.angle + a);
+    },
+    clone: function(){
+        return new Direction(this.angle);
+    },
+    // 把坐标轴体系的角度转换成css transform rotate 体系的角度
+    forCSSRotation: function(){
+        return util.cycle(90 - this.angle);
     }
 };
 util.defineConstructor(Direction);

@@ -3,19 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <title>go</title>
-    <style>
-        .boardView{
-            
-        }
-    </style>
+    <link rel="stylesheet" href="./css/style.css">
 </head>
 <body>
-    <script src="./dist/bundle.js"></script>
-    <script>
-        var board = new Board(15, 10);
-        var robot  = new Robot(5, 7);
-        board.draw(robot);
-        document.body.addChild(board.createView("board"));
-    </script>
+    <script src="./dist/bundle.min.js"></script>
 </body>
 </html>

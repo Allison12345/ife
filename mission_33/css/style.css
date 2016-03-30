@@ -1,0 +1,25 @@
+.boardView{
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    background: url('../img/bg.png');
+}
+
+.robotView{
+    position: absolute;
+    border-radius: 50%;
+}
+
+.btn{
+    position: absolute;
+}
+
+.go{
+    left: 0;
+    bottom: 0;
+}
+
+.turn{
+    left: 50px;
+    bottom: 0;
+}
