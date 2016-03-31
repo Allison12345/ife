@@ -28,6 +28,9 @@ var util = {
         if(value < valueMin) return valueMin;
         else if(value > valueMax) return valueMax;
         return value;
+    },
+    parseCommand: function(cmdStr){
+        
     }
 };
 

@@ -24,7 +24,7 @@ Direction.prototype = {
         return this.angle / 180 * Math.PI;
     },
     addAngle: function(a){
-        this.angle = util.cycle(this.angle + a);
+        return new Direction(this.angle + a);
     },
     clone: function(){
         return new Direction(this.angle);
@@ -32,6 +32,9 @@ Direction.prototype = {
     // 把坐标轴体系的角度转换成css transform rotate 体系的角度
     forCSSRotation: function(){
         return util.cycle(90 - this.angle);
+    },
+    toString: function(){
+        return this.angle;
     }
 };
 util.defineConstructor(Direction);

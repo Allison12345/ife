@@ -80,7 +80,7 @@ Direction.prototype = {
         return this.angle / 180 * Math.PI;
     },
     addAngle: function(a){
-        this.angle = util.cycle(this.angle + a);
+        return new Direction(this.angle + a);
     },
     clone: function(){
         return new Direction(this.angle);
@@ -88,6 +88,9 @@ Direction.prototype = {
     // 把坐标轴体系的角度转换成css transform rotate 体系的角度
     forCSSRotation: function(){
         return util.cycle(90 - this.angle);
+    },
+    toString: function(){
+        return this.angle;
     }
 };
 util.defineConstructor(Direction);
@@ -98,8 +101,8 @@ module.exports = Direction;
 var util = require('./util');
 
 function Pointer(x, y){
-    this.x = x;
-    this.y = y;
+    this.x = parseInt(x);
+    this.y = parseInt(y);
 }
 
 Pointer.ORIGIN = new Pointer(0, 0);
@@ -109,8 +112,7 @@ Pointer.prototype = {
         return new Pointer(this.x * multiple, this.y * multiple);
     },
     add: function(pointer){
-        this.x += pointer.x;
-        this.y += pointer.y;
+        return new Pointer(this.x + pointer.x, this.y + pointer.y);
     },
     normalize: function(boundary){
         this.x = util.limit(this.x, boundary.getMinX(), boundary.getMaxX());
@@ -118,6 +120,9 @@ Pointer.prototype = {
     },
     clone: function(){
         return new Pointer(this.x, this.y);
+    },
+    toString: function(){
+        return "(" + this.x + ", "+ this.y + ")";
     }
 };
 util.defineConstructor(Pointer);
@@ -136,28 +141,25 @@ function Robot(direction, pointer, runningSpeed, rotatingSpeed) {
     else this.pointer = pointer;
     // 默认朝向：NORTH
     if (!(direction instanceof Direction)) this.direction = Direction.EAST;
-    this.direction = direction;
-    // 默认行走速度为 2unit/s
-    if (!runningSpeed) this.runningSpeed = 2;
-    this.runningSpeed = runningSpeed;
-    // 默认转速为 360°/s
-    if (!rotatingSpeed) this.rotatingSpeed = 360;
-    this.rotatingSpeed = rotatingSpeed;
+    else this.direction = direction;
+    // 默认行走速度为 0.002 unit/ms
+    if (!runningSpeed) this.runningSpeed = 0.002;
+    else this.runningSpeed = runningSpeed;
+    // 默认转速为 0.36/ms
+    if (!rotatingSpeed) this.rotatingSpeed = 0.36;
+    else this.rotatingSpeed = rotatingSpeed;
 }
 
 Robot.prototype = {
     go: function(step) {
-        this.pointer.add(this.direction.getVector().multiply(step));
-        this.pointer.normalize(this.boundary);
-        this.updatePointerView();
+        this.updatePointerView(this.pointer.clone(), Math.abs(step) / this.runningSpeed);
     },
     back: function(step) {
         this.go(-step);
     },
     //逆时针旋转
     turn: function(angle) {
-        this.direction.addAngle(angle);
-        this.updateDirectionView();
+        this.updateDirectionView(this.direction.clone(), Math.abs(angle) / this.rotatingSpeed);
     },
     turnRight: function() {
         this.turn(-90);
@@ -174,15 +176,40 @@ Robot.prototype = {
         robotView.style.width = util.getUnit(1);
         robotView.style.height = util.getUnit(1);
         this.view = robotView;
-        this.updatePointerView();
-        this.updateDirectionView();
+        this.updatePointerView(null, 0);
+        this.updateDirectionView(null, 0);
     },
-    updatePointerView: function() {
-        this.view.style.left = util.getUnit(this.pointer.x);
-        this.view.style.bottom = util.getUnit(this.pointer.y);
+    updatePointerView: function(fromPoint, time) {
+        var start = null, that = this;
+        function move(timestamp) {
+            if(!start) start = timestamp;
+            var progress = timestamp - start;
+            if(fromPoint){
+                that.pointer = fromPoint.add(that.direction.getVector().multiply(progress * that.runningSpeed));
+                that.pointer.normalize(that.boundary);
+            }
+            that.view.style.left = util.getUnit(that.pointer.x);
+            that.view.style.bottom = util.getUnit(that.pointer.y);
+            if(progress <= time){
+                window.requestAnimationFrame(arguments.callee);
+            }
+        }
+        window.requestAnimationFrame(move);
     },
-    updateDirectionView: function() {
-        this.view.style.transform = 'rotate(' + this.direction.forCSSRotation() + 'deg)';
+    updateDirectionView: function(fromDirection, time) {
+        var start = null, that = this;
+        function rotate(timestamp) {
+            if(!start) start = timestamp;
+            var progress = timestamp - start;
+            if(fromDirection){
+                that.direction = fromDirection.addAngle(parseInt(progress * that.rotatingSpeed));
+            }
+            that.view.style.transform = 'rotate(' + that.direction.forCSSRotation() + 'deg)';
+            if(progress <= time){
+                window.requestAnimationFrame(arguments.callee);
+            }
+        }
+        window.requestAnimationFrame(rotate);
     },
     setBoundary: function(startPoint, endPoint) {
         this.boundary = new Boundary(startPoint, endPoint);
@@ -204,14 +231,18 @@ var robot  = new Robot(new Direction(90), new Pointer(2, 3));
 board.drawRobot(robot);
 document.body.appendChild(board.createBoardView("board"));
 document.body.appendChild(util.createEle("button", "go", "btn go", "go", "go"));
-document.body.appendChild(util.createEle("button", "turn", "btn turn", "turnLeft", "turnLeft"));
+document.body.appendChild(util.createEle("button", "back", "btn back", "back", "back"));
+document.body.appendChild(util.createEle("button", "turnLeft", "btn turnLeft", "turnLeft", "turnLeft"));
+document.body.appendChild(util.createEle("button", "turnRight", "btn turnRight", "turnRight", "turnRight"));
+document.body.appendChild(util.createEle("button", "turnBack", "btn turnBack", "turnBack", "turnBack"));
 
 util.getEle("go").addEventListener('click', function(e){
     robot.go(1);
 });
 
-util.getEle("turn").addEventListener('click', function(e){
+util.getEle("turnLeft").addEventListener('click', function(e){
     robot.turnLeft();
+    console.log(robot.direction.toString());
 });
 
 },{"./Board":1,"./Direction":3,"./Pointer":4,"./Robot":5,"./util":7}],7:[function(require,module,exports){
@@ -245,6 +276,9 @@ var util = {
         if(value < valueMin) return valueMin;
         else if(value > valueMax) return valueMax;
         return value;
+    },
+    parseCommand: function(cmdStr){
+        
     }
 };
 

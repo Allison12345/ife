@@ -1,8 +1,8 @@
 var util = require('./util');
 
 function Pointer(x, y){
-    this.x = x;
-    this.y = y;
+    this.x = parseInt(x);
+    this.y = parseInt(y);
 }
 
 Pointer.ORIGIN = new Pointer(0, 0);
@@ -12,8 +12,7 @@ Pointer.prototype = {
         return new Pointer(this.x * multiple, this.y * multiple);
     },
     add: function(pointer){
-        this.x += pointer.x;
-        this.y += pointer.y;
+        return new Pointer(this.x + pointer.x, this.y + pointer.y);
     },
     normalize: function(boundary){
         this.x = util.limit(this.x, boundary.getMinX(), boundary.getMaxX());
@@ -21,6 +20,9 @@ Pointer.prototype = {
     },
     clone: function(){
         return new Pointer(this.x, this.y);
+    },
+    toString: function(){
+        return "(" + this.x + ", "+ this.y + ")";
     }
 };
 util.defineConstructor(Pointer);

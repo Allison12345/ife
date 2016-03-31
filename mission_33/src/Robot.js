@@ -9,28 +9,25 @@ function Robot(direction, pointer, runningSpeed, rotatingSpeed) {
     else this.pointer = pointer;
     // 默认朝向：NORTH
     if (!(direction instanceof Direction)) this.direction = Direction.EAST;
-    this.direction = direction;
-    // 默认行走速度为 2unit/s
-    if (!runningSpeed) this.runningSpeed = 2;
-    this.runningSpeed = runningSpeed;
-    // 默认转速为 360°/s
-    if (!rotatingSpeed) this.rotatingSpeed = 360;
-    this.rotatingSpeed = rotatingSpeed;
+    else this.direction = direction;
+    // 默认行走速度为 0.002 unit/ms
+    if (!runningSpeed) this.runningSpeed = 0.002;
+    else this.runningSpeed = runningSpeed;
+    // 默认转速为 0.36/ms
+    if (!rotatingSpeed) this.rotatingSpeed = 0.36;
+    else this.rotatingSpeed = rotatingSpeed;
 }
 
 Robot.prototype = {
     go: function(step) {
-        this.pointer.add(this.direction.getVector().multiply(step));
-        this.pointer.normalize(this.boundary);
-        this.updatePointerView();
+        this.updatePointerView(this.pointer.clone(), Math.abs(step) / this.runningSpeed);
     },
     back: function(step) {
         this.go(-step);
     },
     //逆时针旋转
     turn: function(angle) {
-        this.direction.addAngle(angle);
-        this.updateDirectionView();
+        this.updateDirectionView(this.direction.clone(), Math.abs(angle) / this.rotatingSpeed);
     },
     turnRight: function() {
         this.turn(-90);
@@ -47,15 +44,40 @@ Robot.prototype = {
         robotView.style.width = util.getUnit(1);
         robotView.style.height = util.getUnit(1);
         this.view = robotView;
-        this.updatePointerView();
-        this.updateDirectionView();
+        this.updatePointerView(null, 0);
+        this.updateDirectionView(null, 0);
     },
-    updatePointerView: function() {
-        this.view.style.left = util.getUnit(this.pointer.x);
-        this.view.style.bottom = util.getUnit(this.pointer.y);
+    updatePointerView: function(fromPoint, time) {
+        var start = null, that = this;
+        function move(timestamp) {
+            if(!start) start = timestamp;
+            var progress = timestamp - start;
+            if(fromPoint){
+                that.pointer = fromPoint.add(that.direction.getVector().multiply(progress * that.runningSpeed));
+                that.pointer.normalize(that.boundary);
+            }
+            that.view.style.left = util.getUnit(that.pointer.x);
+            that.view.style.bottom = util.getUnit(that.pointer.y);
+            if(progress <= time){
+                window.requestAnimationFrame(arguments.callee);
+            }
+        }
+        window.requestAnimationFrame(move);
     },
-    updateDirectionView: function() {
-        this.view.style.transform = 'rotate(' + this.direction.forCSSRotation() + 'deg)';
+    updateDirectionView: function(fromDirection, time) {
+        var start = null, that = this;
+        function rotate(timestamp) {
+            if(!start) start = timestamp;
+            var progress = timestamp - start;
+            if(fromDirection){
+                that.direction = fromDirection.addAngle(parseInt(progress * that.rotatingSpeed));
+            }
+            that.view.style.transform = 'rotate(' + that.direction.forCSSRotation() + 'deg)';
+            if(progress <= time){
+                window.requestAnimationFrame(arguments.callee);
+            }
+        }
+        window.requestAnimationFrame(rotate);
     },
     setBoundary: function(startPoint, endPoint) {
         this.boundary = new Boundary(startPoint, endPoint);
