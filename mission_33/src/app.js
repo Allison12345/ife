@@ -5,7 +5,7 @@ var Pointer = require('./Pointer');
 var util = require('./util');
 
 var board = new Board(10, 10);
-var robot  = new Robot(new Direction(90), new Pointer(2, 3));
+var robot  = new Robot(new Direction(90), new Pointer(0, 0));
 board.drawRobot(robot);
 document.body.appendChild(board.createBoardView("board"));
 document.body.appendChild(util.createEle("button", "go", "btn go", "go", "go"));

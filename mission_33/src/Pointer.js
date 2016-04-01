@@ -1,8 +1,8 @@
 var util = require('./util');
 
 function Pointer(x, y){
-    this.x = parseInt(x);
-    this.y = parseInt(y);
+    this.x = x;
+    this.y = y;
 }
 
 Pointer.ORIGIN = new Pointer(0, 0);

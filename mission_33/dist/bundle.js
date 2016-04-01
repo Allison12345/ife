@@ -101,8 +101,8 @@ module.exports = Direction;
 var util = require('./util');
 
 function Pointer(x, y){
-    this.x = parseInt(x);
-    this.y = parseInt(y);
+    this.x = x;
+    this.y = y;
 }
 
 Pointer.ORIGIN = new Pointer(0, 0);
@@ -136,12 +136,12 @@ var Boundary = require('./Boundary');
 var util = require('./util');
 
 function Robot(direction, pointer, runningSpeed, rotatingSpeed) {
-    // 默认坐标：(0, 0), 左下角为原点
-    if (!(pointer instanceof Pointer)) this.pointer = Pointer.ORIGIN;
-    else this.pointer = pointer;
     // 默认朝向：NORTH
     if (!(direction instanceof Direction)) this.direction = Direction.EAST;
     else this.direction = direction;
+    // 默认坐标：(0, 0), 左下角为原点
+    if (!(pointer instanceof Pointer)) this.pointer = Pointer.ORIGIN;
+    else this.pointer = pointer;
     // 默认行走速度为 0.002 unit/ms
     if (!runningSpeed) this.runningSpeed = 0.002;
     else this.runningSpeed = runningSpeed;
@@ -179,33 +179,36 @@ Robot.prototype = {
         this.updatePointerView(null, 0);
         this.updateDirectionView(null, 0);
     },
-    updatePointerView: function(fromPoint, time) {
-        var start = null, that = this;
+    updatePointerView: function(fromPointer, time) {
+        var start = null,
+            that = this;
         function move(timestamp) {
-            if(!start) start = timestamp;
-            var progress = timestamp - start;
-            if(fromPoint){
-                that.pointer = fromPoint.add(that.direction.getVector().multiply(progress * that.runningSpeed));
+            if (!start) start = timestamp;
+            var progress = (timestamp - start).toFixed();
+            if (fromPointer) {
+                that.pointer = fromPointer.add(that.direction.getVector().multiply(progress * that.runningSpeed));
                 that.pointer.normalize(that.boundary);
             }
             that.view.style.left = util.getUnit(that.pointer.x);
             that.view.style.bottom = util.getUnit(that.pointer.y);
-            if(progress <= time){
+            if (progress < time) {
                 window.requestAnimationFrame(arguments.callee);
             }
         }
         window.requestAnimationFrame(move);
     },
     updateDirectionView: function(fromDirection, time) {
-        var start = null, that = this;
+        var start = null,
+            that = this;
+
         function rotate(timestamp) {
-            if(!start) start = timestamp;
-            var progress = timestamp - start;
-            if(fromDirection){
-                that.direction = fromDirection.addAngle(parseInt(progress * that.rotatingSpeed));
+            if (!start) start = timestamp;
+            var progress = (timestamp - start).toFixed();
+            if (fromDirection) {
+                that.direction = fromDirection.addAngle(Math.round(progress * that.rotatingSpeed));
             }
             that.view.style.transform = 'rotate(' + that.direction.forCSSRotation() + 'deg)';
-            if(progress <= time){
+            if (progress < time) {
                 window.requestAnimationFrame(arguments.callee);
             }
         }
@@ -227,7 +230,7 @@ var Pointer = require('./Pointer');
 var util = require('./util');
 
 var board = new Board(10, 10);
-var robot  = new Robot(new Direction(90), new Pointer(2, 3));
+var robot  = new Robot(new Direction(90), new Pointer(0, 0));
 board.drawRobot(robot);
 document.body.appendChild(board.createBoardView("board"));
 document.body.appendChild(util.createEle("button", "go", "btn go", "go", "go"));
@@ -278,7 +281,16 @@ var util = {
         return value;
     },
     parseCommand: function(cmdStr){
-        
+        var cmd = "", args = [];
+        return {
+            "cmd": cmd,
+            "args":args
+        };
+    },
+    parseCmds: function(cmdStrs){
+        return cmdStrs.split("\r\n").map(function(cmdStr){
+            return this.parseCommand(cmdStr);
+        });
     }
 };
 

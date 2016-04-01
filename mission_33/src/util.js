@@ -1,3 +1,5 @@
+var Command = require('./Command');
+
 var util = {
     defineConstructor: function(ClassObject) {
         Object.defineProperty(ClassObject.prototype, 'constructor', {
@@ -29,8 +31,20 @@ var util = {
         else if(value > valueMax) return valueMax;
         return value;
     },
-    parseCommand: function(cmdStr){
-        
+    getCmds: function(master, cmdStrs){
+        return cmdStrs.split("\r\n").map(function(cmdStr){
+            var cmd = new Command();
+            cmd.setMaster(master);
+            cmd.parse(cmdStr);
+            return cmd;
+        });
+    },
+    trim: function(str){
+        if(String.prototype.trim){
+            return str.trim();
+        }else{
+            return str.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
+        }
     }
 };
 
