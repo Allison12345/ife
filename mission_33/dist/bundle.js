@@ -2,21 +2,26 @@
 var Pointer = require('./Pointer');
 var util = require('./util');
 
-function Board(w, h){
+function Board(w, h) {
     this.width = w;
     this.height = h;
 }
 Board.prototype = {
-    createBoardView: function(id){
-        var boardView = util.createEle("div", id, 'boardView');
-        boardView.style.width = util.getUnit(this.width);
-        boardView.style.height = util.getUnit(this.height);
-        boardView.appendChild(this.robot.view);
+    createBoardView: function(id, bgImg) {
+        var boardView = util.createEle("div", {
+            "id": id,
+            "style": {
+                "width": util.getUnit(this.width),
+                "height": util.getUnit(this.height),
+                "backgroundImage": bgImg
+            }
+        });
+        util.append(boardView, this.robotView, 'left-bottom', this.robot.pointer.x, this.robot.pointer.y);
         return boardView;
     },
-    drawRobot: function(robot){
+    drawRobot: function(robot) {
         robot.setBoundary(Pointer.ORIGIN, new Pointer(this.width - 1, this.height - 1));
-        robot.setView();
+        robot.setView('robot', './img/bug.png');
         this.robot = robot;
     }
 };
@@ -150,16 +155,45 @@ function Robot(direction, pointer, runningSpeed, rotatingSpeed) {
     else this.rotatingSpeed = rotatingSpeed;
 }
 
+var cm = new Map();
+cm.set(/^go(\s)+(-)?(\d)*$/i, Robot.prototype.go);
+cm.set(/^back(\s)+(-)?(\d)*$/i, Robot.prototype.back);
+cm.set(/^turn(\s)+(-)?(\d)*/i, Robot.prototype.turn);
+cm.set(/^turn(\s)*l(eft)?$/i, Robot.prototype.turnLeft);
+cm.set(/^turn(\s)*r(ight)?$/i, Robot.prototype.turnRight);
+cm.set(/^turn(\s)*b(ack)?$/i, Robot.prototype.turnBack);
+Robot.CmdMap = cm;
+
 Robot.prototype = {
     go: function(step) {
-        this.updatePointerView(this.pointer.clone(), Math.abs(step) / this.runningSpeed);
+        if (step > 0) {
+            this.updatePointerView(this.pointer.clone(), Math.abs(step) / this.runningSpeed, 1);
+        } else if (step < 0) {
+            this.back(-step);
+        }
     },
     back: function(step) {
-        this.go(-step);
+        if (step > 0) {
+            this.updatePointerView(this.pointer.clone(), Math.abs(step) / this.runningSpeed, -1);
+        } else if (step < 0) {
+            this.go(-step);
+        }
     },
     //逆时针旋转
-    turn: function(angle) {
-        this.updateDirectionView(this.direction.clone(), Math.abs(angle) / this.rotatingSpeed);
+    turn: function() {
+        if (typeof arguments[0] === 'number') {
+            if (arguments[0] > 0) {
+                this.updateDirectionView(this.direction.clone(), Math.abs(arguments[0]) / this.rotatingSpeed, 1);
+            } else if (arguments[0] < 0) {
+                this.updateDirectionView(this.direction.clone(), Math.abs(arguments[0]) / this.rotatingSpeed, -1);
+            }
+        } else if (typeof arguments[0] === 'string') {
+            if (typeof arguments[1] === 'number') {
+
+            } else {
+
+            }
+        }
     },
     turnRight: function() {
         this.turn(-90);
@@ -170,25 +204,25 @@ Robot.prototype = {
     turnBack: function() {
         this.turn(180);
     },
-    setView: function() {
-        var robotView = util.createEle("img", "robot", "robotView");
-        robotView.src = './img/bug.png';
-        robotView.style.width = util.getUnit(1);
-        robotView.style.height = util.getUnit(1);
+    setView: function(id, imgSrc) {
+        var robotView = util.createEle("img", {
+            "id": id,
+            "className": "robotView",
+            "src": imgSrc,
+            "width": util.getUnit(1),
+            "height": util.getUnit(1)
+        });
         this.view = robotView;
-        this.updatePointerView(null, 0);
-        this.updateDirectionView(null, 0);
     },
-    updatePointerView: function(fromPointer, time) {
+    updatePointerView: function(fromPointer, time, isPositive) {
         var start = null,
             that = this;
+
         function move(timestamp) {
             if (!start) start = timestamp;
             var progress = (timestamp - start).toFixed();
-            if (fromPointer) {
-                that.pointer = fromPointer.add(that.direction.getVector().multiply(progress * that.runningSpeed));
-                that.pointer.normalize(that.boundary);
-            }
+            that.pointer = fromPointer.add(that.direction.getVector().multiply(isPositive * progress * that.runningSpeed));
+            that.pointer.normalize(that.boundary);
             that.view.style.left = util.getUnit(that.pointer.x);
             that.view.style.bottom = util.getUnit(that.pointer.y);
             if (progress < time) {
@@ -197,16 +231,14 @@ Robot.prototype = {
         }
         window.requestAnimationFrame(move);
     },
-    updateDirectionView: function(fromDirection, time) {
+    updateDirectionView: function(fromDirection, time, isPositive) {
         var start = null,
             that = this;
 
         function rotate(timestamp) {
             if (!start) start = timestamp;
             var progress = (timestamp - start).toFixed();
-            if (fromDirection) {
-                that.direction = fromDirection.addAngle(Math.round(progress * that.rotatingSpeed));
-            }
+            that.direction = fromDirection.addAngle(Math.round(isPositive * progress * that.rotatingSpeed));
             that.view.style.transform = 'rotate(' + that.direction.forCSSRotation() + 'deg)';
             if (progress < time) {
                 window.requestAnimationFrame(arguments.callee);
@@ -216,6 +248,9 @@ Robot.prototype = {
     },
     setBoundary: function(startPoint, endPoint) {
         this.boundary = new Boundary(startPoint, endPoint);
+    },
+    getCmdMap: function() {
+        return Robot.CmdMap;
     }
 };
 util.defineConstructor(Robot);
@@ -230,22 +265,89 @@ var Pointer = require('./Pointer');
 var util = require('./util');
 
 var board = new Board(10, 10);
-var robot  = new Robot(new Direction(90), new Pointer(0, 0));
+var robot = new Robot(new Direction(90), new Pointer(3, 4));
 board.drawRobot(robot);
-document.body.appendChild(board.createBoardView("board"));
-document.body.appendChild(util.createEle("button", "go", "btn go", "go", "go"));
-document.body.appendChild(util.createEle("button", "back", "btn back", "back", "back"));
-document.body.appendChild(util.createEle("button", "turnLeft", "btn turnLeft", "turnLeft", "turnLeft"));
-document.body.appendChild(util.createEle("button", "turnRight", "btn turnRight", "turnRight", "turnRight"));
-document.body.appendChild(util.createEle("button", "turnBack", "btn turnBack", "turnBack", "turnBack"));
+util.append(document.body, board.createBoardView("board", 'url("../img/bg.png")'), 'left-top', 10, 10, true);
 
-util.getEle("go").addEventListener('click', function(e){
+util.append(document.body, util.createEle("button", {
+    "id": "go",
+    "className": "btn go",
+    "onclick": clickHandler
+}, "go"), 'left-bottom', 10, 40, true);
+
+util.append(document.body, util.createEle("button", {
+    "id": "back",
+    "className": "btn back",
+    "onclick": clickHandler
+}, "back"), 'left-bottom', 100, 40, true);
+
+util.append(document.body, util.createEle("button", {
+    "id": "turnLeft",
+    "className": "btn turnLeft",
+    "onclick": clickHandler
+}, "turnLeft"), 'left-bottom', 10, 10, true);
+
+util.append(document.body, util.createEle("button", {
+    "id": "turnRight",
+    "className": "btn turnRight",
+    "onclick": clickHandler
+}, "turnRight"), 'left-bottom', 100, 10, true);
+
+util.append(document.body, util.createEle("button", {
+    "id": "turnBack",
+    "className": "btn turnBack",
+    "onclick": clickHandler
+}, "turnBack"), 'left-bottom', 190, 10, true);
+
+function clickHandler(e) {
+
+}
+
+util.append(document.body, util.createEle("div", {
+    "id": "logger",
+    "className": "logger",
+    "style": {
+        "width": "300px",
+        "height": "800px"
+    }
+}), 'right-top', 10, 10, true);
+
+
+util.append(document.body, util.createEle("textarea", {
+    "id": "cmdarea",
+    "className": "cmdarea",
+    "placeholder": "请输入要执行的命令",
+    "cols": 30,
+    "rows": 5,
+    "autofocus": "autofocus",
+    "onkeyup": keyHandler,
+
+}), 'left-bottom', 10, 100, true);
+
+function keyHandler(e){
+
+}
+
+
+util.getEle("go").addEventListener('click', function(e) {
     robot.go(1);
+    util.log(util.getEle("logger"), "robot go 1", "red");
 });
-
-util.getEle("turnLeft").addEventListener('click', function(e){
+util.getEle("back").addEventListener('click', function(e) {
+    robot.back(1);
+    util.log(util.getEle("logger"), "robot back 1", "red");
+});
+util.getEle("turnLeft").addEventListener('click', function(e) {
     robot.turnLeft();
-    console.log(robot.direction.toString());
+    util.log(util.getEle("logger"), "robot turn left", "orange");
+});
+util.getEle("turnRight").addEventListener('click', function(e) {
+    robot.turnRight();
+    util.log(util.getEle("logger"), "robot turn right", "orange");
+});
+util.getEle("turnBack").addEventListener('click', function(e) {
+    robot.turnBack();
+    util.log(util.getEle("logger"), "robot turn back", "orange");
 });
 
 },{"./Board":1,"./Direction":3,"./Pointer":4,"./Robot":5,"./util":7}],7:[function(require,module,exports){
@@ -256,41 +358,62 @@ var util = {
             enumerable: false
         });
     },
-    createEle: function(name, id, className, value, text) {
+    createEle: function(name, attrs, text) {
         var ele = document.createElement(name);
-        if (id) ele.id = id;
-        if (className) ele.className = className;
-        if(value)ele.value = value;
-        if(text)ele.appendChild(document.createTextNode(text));
+        if (attrs)
+            for (var key in attrs) ele[key] = attrs[key];
+        if (text) ele.appendChild(document.createTextNode(text));
         return ele;
     },
-    getEle: function(id){
+    append: function(container, child, type, x, y, isPX) {
+        var refer = type.split('-');
+        if (refer.length > 0) {
+            child.style.position = 'absolute';
+            if (isPX) {
+                child.style[refer[0]] = x;
+                child.style[refer[1]] = y;
+            } else {
+                child.style[refer[0]] = this.getUnit(x);
+                child.style[refer[1]] = this.getUnit(y);
+            }
+        }
+        container.appendChild(child);
+    },
+    getEle: function(id) {
         return document.getElementById(id);
     },
-    cycle: function(angle){
+    cycle: function(angle) {
         if (angle >= 0) return angle % 360;
         else return 360 - (-angle) % 360;
     },
-    getUnit: function(x, unit){
-        if(!unit) unit = 50;
+    getUnit: function(x, unit) {
+        if (!unit) unit = this.defaultValues.unit;
         return (x * unit) + 'px';
     },
-    limit: function (value, valueMin, valueMax){
-        if(value < valueMin) return valueMin;
-        else if(value > valueMax) return valueMax;
+    limit: function(value, valueMin, valueMax) {
+        if (value < valueMin) return valueMin;
+        else if (value > valueMax) return valueMax;
         return value;
     },
-    parseCommand: function(cmdStr){
-        var cmd = "", args = [];
-        return {
-            "cmd": cmd,
-            "args":args
-        };
+    trim: function(str) {
+        if (String.prototype.trim) {
+            return str.trim();
+        } else {
+            return str.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
+        }
     },
-    parseCmds: function(cmdStrs){
-        return cmdStrs.split("\r\n").map(function(cmdStr){
-            return this.parseCommand(cmdStr);
-        });
+    log: function(container, str, color) {
+        var timeP = this.createEle("p", null, "logTime", null, new Date().toLocaleString());
+        var logP = this.createEle("p", null, null, null, str);
+        if (color) logP.style.color = color;
+        logP.style.marginBottom = '0.5em';
+        container.appendChild(timeP);
+        container.appendChild(logP);
+    },
+    'defaultValues': {
+        'unit': 50,
+        'step': 1,
+        'angle': 90
     }
 };
 
