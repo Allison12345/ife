@@ -1,0 +1,139 @@
+*{
+    padding: 0;
+    margin: 0;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+body{
+    font-family: Arial;
+}
+ul,li{
+    list-style: none;
+}
+a{
+    text-decoration: none;
+    color: black;
+}
+a:hover{
+    color: black;
+    text-decoration: none;
+}
+b,
+i{
+    font-weight: normal;
+    font-style: normal;
+}
+.hide{
+    display: none;
+}
+.f0{
+    font-size: 0;
+    -webkit-text-size-adjust:none;
+}
+.f14{
+    font-size: 14px;
+}
+.f16{
+    font-size:16px;
+}
+.f17{
+    font-size: 17px;
+}
+.f18{
+    font-size: 18px;
+}
+.f19{
+    font-size: 19px;
+}
+.f20{
+    font-size: 20px;
+}
+.f21{
+    font-size: 21px;
+}
+.f22{
+    font-size: 22px;
+}
+.f23{
+    font-size: 23px;
+}
+.f24{
+    font-size: 24px;
+}
+.f25{
+    font-size: 25px;
+}
+.f26{
+    font-size: 26px;
+}
+.f27{
+    font-size: 27px;
+}
+.f28{
+    font-size: 28px;
+}
+.f29{
+    font-size: 29px;
+}
+.f30{
+    font-size: 30px;
+}
+.fl{
+    float: left;
+}
+.fr{
+    float: right;
+}
+.clr:after {
+    content: ".";
+    height: 0;
+    clear: both;
+    display: block;
+    visibility: hidden;
+}
+.h-100{
+    height: 100%;
+}
+.position-r{
+    position: relative;
+}
+.position-a{
+    position: absolute;
+}
+.left-100{
+    left: 100%;
+}
+.right-100{
+    right: 100%;
+}
+.top-100{
+    top: 100%;
+}
+.bottom-100{
+    bottom: 100%;
+}
+.left-0{
+    left: 0;
+}
+.right-0{
+    right: 0;
+}
+.top-0{
+    top: 0;
+}
+.bottom-0{
+    bottom:0;
+}
+.inline-block{
+    display: inline-block;
+}
+.middle{
+    vertical-align: middle;
+}
+.color-white{
+    color: white;
+}
+.clear-border{
+    border: none !important;
+}
