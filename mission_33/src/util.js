@@ -71,9 +71,7 @@ var util = {
     },
     'defaultValues': {
         'unit': 50,
-        'measure': 'px',
-        'step': 1,
-        'angle': 90
+        'measure': 'px'
     }
 };
 

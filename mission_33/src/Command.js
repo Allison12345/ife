@@ -40,7 +40,7 @@ Command.prototype = {
             if(key.test(str))break;
             key = mapIter.next().value;
         }
-
+        this.func = map.get(key);
     },
     toString: function(){
         return this.name;

@@ -166,6 +166,7 @@ Robot.CmdMap = cm;
 
 Robot.prototype = {
     go: function(step) {
+        if(!step) step = 1;
         if (step > 0) {
             this.updatePointerView(this.pointer.clone(), Math.abs(step) / this.runningSpeed, 1);
         } else if (step < 0) {
@@ -173,6 +174,7 @@ Robot.prototype = {
         }
     },
     back: function(step) {
+        if(!step) step = 1;
         if (step > 0) {
             this.updatePointerView(this.pointer.clone(), Math.abs(step) / this.runningSpeed, -1);
         } else if (step < 0) {
@@ -181,13 +183,15 @@ Robot.prototype = {
     },
     //逆时针旋转
     turn: function() {
-        if (typeof arguments[0] === 'number') {
-            if (arguments[0] > 0) {
-                this.updateDirectionView(this.direction.clone(), Math.abs(arguments[0]) / this.rotatingSpeed, 1);
-            } else if (arguments[0] < 0) {
-                this.updateDirectionView(this.direction.clone(), Math.abs(arguments[0]) / this.rotatingSpeed, -1);
+        var arg = arguments[0];
+        if(!arg) arg = 90;
+        if (typeof arg === 'number') {
+            if (arg > 0) {
+                this.updateDirectionView(this.direction.clone(), Math.abs(arg) / this.rotatingSpeed, 1);
+            } else if (arg < 0) {
+                this.updateDirectionView(this.direction.clone(), Math.abs(arg) / this.rotatingSpeed, -1);
             }
-        } else if (typeof arguments[0] === 'string') {
+        } else if (typeof arg === 'string') {
             if (typeof arguments[1] === 'number') {
 
             } else {
@@ -301,7 +305,9 @@ util.append(document.body, util.createEle("button", {
 }, "turnBack"), 'left-bottom', 190, 10, "px");
 
 function clickHandler(e) {
-
+    var action = e.target.id;
+    robot[action]();
+    util.log(util.getEle("logger"), action);
 }
 
 util.append(document.body, util.createEle("div", {
@@ -329,27 +335,26 @@ function keyHandler(e){
 
 }
 
-
-util.getEle("go").addEventListener('click', function(e) {
-    robot.go(1);
-    util.log(util.getEle("logger"), "robot go 1", "red");
-});
-util.getEle("back").addEventListener('click', function(e) {
-    robot.back(1);
-    util.log(util.getEle("logger"), "robot back 1", "red");
-});
-util.getEle("turnLeft").addEventListener('click', function(e) {
-    robot.turnLeft();
-    util.log(util.getEle("logger"), "robot turn left", "orange");
-});
-util.getEle("turnRight").addEventListener('click', function(e) {
-    robot.turnRight();
-    util.log(util.getEle("logger"), "robot turn right", "orange");
-});
-util.getEle("turnBack").addEventListener('click', function(e) {
-    robot.turnBack();
-    util.log(util.getEle("logger"), "robot turn back", "orange");
-});
+// util.getEle("go").addEventListener('click', function(e) {
+//     robot.go(1);
+//     util.log(util.getEle("logger"), "robot go 1", "red");
+// });
+// util.getEle("back").addEventListener('click', function(e) {
+//     robot.back(1);
+//     util.log(util.getEle("logger"), "robot back 1", "red");
+// });
+// util.getEle("turnLeft").addEventListener('click', function(e) {
+//     robot.turnLeft();
+//     util.log(util.getEle("logger"), "robot turn left", "orange");
+// });
+// util.getEle("turnRight").addEventListener('click', function(e) {
+//     robot.turnRight();
+//     util.log(util.getEle("logger"), "robot turn right", "orange");
+// });
+// util.getEle("turnBack").addEventListener('click', function(e) {
+//     robot.turnBack();
+//     util.log(util.getEle("logger"), "robot turn back", "orange");
+// });
 
 },{"./Board":1,"./Direction":3,"./Pointer":4,"./Robot":5,"./util":7}],7:[function(require,module,exports){
 var util = {
@@ -425,9 +430,7 @@ var util = {
     },
     'defaultValues': {
         'unit': 50,
-        'measure': 'px',
-        'step': 1,
-        'angle': 90
+        'measure': 'px'
     }
 };
 

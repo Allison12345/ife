@@ -40,7 +40,9 @@ util.append(document.body, util.createEle("button", {
 }, "turnBack"), 'left-bottom', 190, 10, "px");
 
 function clickHandler(e) {
-
+    var action = e.target.id;
+    robot[action]();
+    util.log(util.getEle("logger"), action);
 }
 
 util.append(document.body, util.createEle("div", {
@@ -67,25 +69,3 @@ util.append(document.body, util.createEle("textarea", {
 function keyHandler(e){
 
 }
-
-
-util.getEle("go").addEventListener('click', function(e) {
-    robot.go(1);
-    util.log(util.getEle("logger"), "robot go 1", "red");
-});
-util.getEle("back").addEventListener('click', function(e) {
-    robot.back(1);
-    util.log(util.getEle("logger"), "robot back 1", "red");
-});
-util.getEle("turnLeft").addEventListener('click', function(e) {
-    robot.turnLeft();
-    util.log(util.getEle("logger"), "robot turn left", "orange");
-});
-util.getEle("turnRight").addEventListener('click', function(e) {
-    robot.turnRight();
-    util.log(util.getEle("logger"), "robot turn right", "orange");
-});
-util.getEle("turnBack").addEventListener('click', function(e) {
-    robot.turnBack();
-    util.log(util.getEle("logger"), "robot turn back", "orange");
-});

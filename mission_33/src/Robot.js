@@ -29,6 +29,7 @@ Robot.CmdMap = cm;
 
 Robot.prototype = {
     go: function(step) {
+        if(!step) step = 1;
         if (step > 0) {
             this.updatePointerView(this.pointer.clone(), Math.abs(step) / this.runningSpeed, 1);
         } else if (step < 0) {
@@ -36,6 +37,7 @@ Robot.prototype = {
         }
     },
     back: function(step) {
+        if(!step) step = 1;
         if (step > 0) {
             this.updatePointerView(this.pointer.clone(), Math.abs(step) / this.runningSpeed, -1);
         } else if (step < 0) {
@@ -44,13 +46,15 @@ Robot.prototype = {
     },
     //逆时针旋转
     turn: function() {
-        if (typeof arguments[0] === 'number') {
-            if (arguments[0] > 0) {
-                this.updateDirectionView(this.direction.clone(), Math.abs(arguments[0]) / this.rotatingSpeed, 1);
-            } else if (arguments[0] < 0) {
-                this.updateDirectionView(this.direction.clone(), Math.abs(arguments[0]) / this.rotatingSpeed, -1);
+        var arg = arguments[0];
+        if(!arg) arg = 90;
+        if (typeof arg === 'number') {
+            if (arg > 0) {
+                this.updateDirectionView(this.direction.clone(), Math.abs(arg) / this.rotatingSpeed, 1);
+            } else if (arg < 0) {
+                this.updateDirectionView(this.direction.clone(), Math.abs(arg) / this.rotatingSpeed, -1);
             }
-        } else if (typeof arguments[0] === 'string') {
+        } else if (typeof arg === 'string') {
             if (typeof arguments[1] === 'number') {
 
             } else {
