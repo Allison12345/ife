@@ -15,7 +15,7 @@ Board.prototype = {
                 "backgroundImage": bgImg
             }
         });
-        util.append(boardView, this.robotView, 'left-bottom', this.robot.pointer.x, this.robot.pointer.y);
+        util.append(boardView, this.robot.view, 'left-bottom', this.robot.pointer.x, this.robot.pointer.y);
         return boardView;
     },
     drawRobot: function(robot) {

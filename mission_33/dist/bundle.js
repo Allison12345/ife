@@ -16,7 +16,7 @@ Board.prototype = {
                 "backgroundImage": bgImg
             }
         });
-        util.append(boardView, this.robotView, 'left-bottom', this.robot.pointer.x, this.robot.pointer.y);
+        util.append(boardView, this.robot.view, 'left-bottom', this.robot.pointer.x, this.robot.pointer.y);
         return boardView;
     },
     drawRobot: function(robot) {
@@ -205,14 +205,15 @@ Robot.prototype = {
         this.turn(180);
     },
     setView: function(id, imgSrc) {
-        var robotView = util.createEle("img", {
+        this.view = util.createEle("img", {
             "id": id,
             "className": "robotView",
             "src": imgSrc,
-            "width": util.getUnit(1),
-            "height": util.getUnit(1)
+            "style": {
+                "width": util.getUnit(1),
+                "height": util.getUnit(1),
+            }
         });
-        this.view = robotView;
     },
     updatePointerView: function(fromPointer, time, isPositive) {
         var start = null,
@@ -267,37 +268,37 @@ var util = require('./util');
 var board = new Board(10, 10);
 var robot = new Robot(new Direction(90), new Pointer(3, 4));
 board.drawRobot(robot);
-util.append(document.body, board.createBoardView("board", 'url("../img/bg.png")'), 'left-top', 10, 10, true);
+util.append(document.body, board.createBoardView("board", 'url("./img/bg.png")'), 'left-top', 10, 10, true);
 
 util.append(document.body, util.createEle("button", {
     "id": "go",
     "className": "btn go",
     "onclick": clickHandler
-}, "go"), 'left-bottom', 10, 40, true);
+}, "go"), 'left-bottom', "10px", "40px");
 
 util.append(document.body, util.createEle("button", {
     "id": "back",
     "className": "btn back",
     "onclick": clickHandler
-}, "back"), 'left-bottom', 100, 40, true);
+}, "back"), 'left-bottom', "100px", "40px");
 
 util.append(document.body, util.createEle("button", {
     "id": "turnLeft",
     "className": "btn turnLeft",
     "onclick": clickHandler
-}, "turnLeft"), 'left-bottom', 10, 10, true);
+}, "turnLeft"), 'left-bottom', 10, 10, "px");
 
 util.append(document.body, util.createEle("button", {
     "id": "turnRight",
     "className": "btn turnRight",
     "onclick": clickHandler
-}, "turnRight"), 'left-bottom', 100, 10, true);
+}, "turnRight"), 'left-bottom', 100, 10, "px");
 
 util.append(document.body, util.createEle("button", {
     "id": "turnBack",
     "className": "btn turnBack",
     "onclick": clickHandler
-}, "turnBack"), 'left-bottom', 190, 10, true);
+}, "turnBack"), 'left-bottom', 190, 10, "px");
 
 function clickHandler(e) {
 
@@ -310,7 +311,7 @@ util.append(document.body, util.createEle("div", {
         "width": "300px",
         "height": "800px"
     }
-}), 'right-top', 10, 10, true);
+}), 'right-top', "10px", "10px");
 
 
 util.append(document.body, util.createEle("textarea", {
@@ -322,7 +323,7 @@ util.append(document.body, util.createEle("textarea", {
     "autofocus": "autofocus",
     "onkeyup": keyHandler,
 
-}), 'left-bottom', 10, 100, true);
+}), 'left-bottom', "10px", "100px");
 
 function keyHandler(e){
 
@@ -360,22 +361,25 @@ var util = {
     },
     createEle: function(name, attrs, text) {
         var ele = document.createElement(name);
-        if (attrs)
-            for (var key in attrs) ele[key] = attrs[key];
+        this.recurAssign(ele, attrs);
         if (text) ele.appendChild(document.createTextNode(text));
         return ele;
     },
-    append: function(container, child, type, x, y, isPX) {
+    recurAssign: function(obj, attrs) {
+        for (var key in attrs) {
+            if (typeof attrs[key] === 'object') {
+                this.recurAssign(obj[key], attrs[key]);
+            } else {
+                obj[key] = attrs[key];
+            }
+        }
+    },
+    append: function(container, child, type, x, y, measure) {
         var refer = type.split('-');
         if (refer.length > 0) {
             child.style.position = 'absolute';
-            if (isPX) {
-                child.style[refer[0]] = x;
-                child.style[refer[1]] = y;
-            } else {
-                child.style[refer[0]] = this.getUnit(x);
-                child.style[refer[1]] = this.getUnit(y);
-            }
+            child.style[refer[0]] = this.getUnit(x, null, measure);
+            child.style[refer[1]] = this.getUnit(y, null, measure);
         }
         container.appendChild(child);
     },
@@ -386,9 +390,12 @@ var util = {
         if (angle >= 0) return angle % 360;
         else return 360 - (-angle) % 360;
     },
-    getUnit: function(x, unit) {
+    getUnit: function(x, unit, measure) {
+        if (isNaN(x)) return x;
+        if (measure) return x + measure;
         if (!unit) unit = this.defaultValues.unit;
-        return (x * unit) + 'px';
+        measure = this.defaultValues.measure;
+        return (x * unit) + measure;
     },
     limit: function(value, valueMin, valueMax) {
         if (value < valueMin) return valueMin;
@@ -403,15 +410,22 @@ var util = {
         }
     },
     log: function(container, str, color) {
-        var timeP = this.createEle("p", null, "logTime", null, new Date().toLocaleString());
-        var logP = this.createEle("p", null, null, null, str);
-        if (color) logP.style.color = color;
-        logP.style.marginBottom = '0.5em';
+        var timeP = this.createEle("p", {
+            "className": "logTime"
+        }, new Date().toLocaleString());
+        if (!color) color = 'white';
+        var logP = this.createEle("p", {
+            'style': {
+                'color': color,
+                'marginBottom': '0.5em'
+            }
+        }, str);
         container.appendChild(timeP);
         container.appendChild(logP);
     },
     'defaultValues': {
         'unit': 50,
+        'measure': 'px',
         'step': 1,
         'angle': 90
     }

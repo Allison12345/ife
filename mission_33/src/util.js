@@ -7,22 +7,25 @@ var util = {
     },
     createEle: function(name, attrs, text) {
         var ele = document.createElement(name);
-        if (attrs)
-            for (var key in attrs) ele[key] = attrs[key];
+        this.recurAssign(ele, attrs);
         if (text) ele.appendChild(document.createTextNode(text));
         return ele;
     },
-    append: function(container, child, type, x, y, isPX) {
+    recurAssign: function(obj, attrs) {
+        for (var key in attrs) {
+            if (typeof attrs[key] === 'object') {
+                this.recurAssign(obj[key], attrs[key]);
+            } else {
+                obj[key] = attrs[key];
+            }
+        }
+    },
+    append: function(container, child, type, x, y, measure) {
         var refer = type.split('-');
         if (refer.length > 0) {
             child.style.position = 'absolute';
-            if (isPX) {
-                child.style[refer[0]] = x;
-                child.style[refer[1]] = y;
-            } else {
-                child.style[refer[0]] = this.getUnit(x);
-                child.style[refer[1]] = this.getUnit(y);
-            }
+            child.style[refer[0]] = this.getUnit(x, null, measure);
+            child.style[refer[1]] = this.getUnit(y, null, measure);
         }
         container.appendChild(child);
     },
@@ -33,9 +36,12 @@ var util = {
         if (angle >= 0) return angle % 360;
         else return 360 - (-angle) % 360;
     },
-    getUnit: function(x, unit) {
+    getUnit: function(x, unit, measure) {
+        if (isNaN(x)) return x;
+        if (measure) return x + measure;
         if (!unit) unit = this.defaultValues.unit;
-        return (x * unit) + 'px';
+        measure = this.defaultValues.measure;
+        return (x * unit) + measure;
     },
     limit: function(value, valueMin, valueMax) {
         if (value < valueMin) return valueMin;
@@ -50,15 +56,22 @@ var util = {
         }
     },
     log: function(container, str, color) {
-        var timeP = this.createEle("p", null, "logTime", null, new Date().toLocaleString());
-        var logP = this.createEle("p", null, null, null, str);
-        if (color) logP.style.color = color;
-        logP.style.marginBottom = '0.5em';
+        var timeP = this.createEle("p", {
+            "className": "logTime"
+        }, new Date().toLocaleString());
+        if (!color) color = 'white';
+        var logP = this.createEle("p", {
+            'style': {
+                'color': color,
+                'marginBottom': '0.5em'
+            }
+        }, str);
         container.appendChild(timeP);
         container.appendChild(logP);
     },
     'defaultValues': {
         'unit': 50,
+        'measure': 'px',
         'step': 1,
         'angle': 90
     }

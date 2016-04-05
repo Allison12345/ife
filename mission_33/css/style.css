@@ -4,14 +4,12 @@ div, p {
 }
 
 .robotView {
-    position: absolute;
     border-radius: 50%;
 }
 
 .logger {
     overflow: auto;
     background: black;
-    color: white;
 }
 .logTime {
     font-size: 0.8em;

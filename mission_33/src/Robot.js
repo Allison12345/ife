@@ -68,14 +68,15 @@ Robot.prototype = {
         this.turn(180);
     },
     setView: function(id, imgSrc) {
-        var robotView = util.createEle("img", {
+        this.view = util.createEle("img", {
             "id": id,
             "className": "robotView",
             "src": imgSrc,
-            "width": util.getUnit(1),
-            "height": util.getUnit(1)
+            "style": {
+                "width": util.getUnit(1),
+                "height": util.getUnit(1),
+            }
         });
-        this.view = robotView;
     },
     updatePointerView: function(fromPointer, time, isPositive) {
         var start = null,
