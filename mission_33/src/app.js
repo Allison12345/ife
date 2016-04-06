@@ -47,7 +47,6 @@ function clickHandler(e) {
     var cmd = new Command(robot, ele.id);
     cmd.parse(ele.id + " " + ele.value);
     cmd.exe();
-    util.log(util.getEle("logger"), cmd.toString());
 }
 
 util.append(document.body, util.createEle("div", {
@@ -55,7 +54,7 @@ util.append(document.body, util.createEle("div", {
     "className": "logger",
     "style": {
         "width": "300px",
-        "height": "800px"
+        "height": "600px"
     }
 }), 'right-top', "10px", "10px");
 
@@ -64,13 +63,15 @@ util.append(document.body, util.createEle("textarea", {
     "id": "cmdarea",
     "className": "cmdarea",
     "placeholder": "请输入要执行的命令",
-    "cols": 30,
+    "cols": 20,
     "rows": 5,
     "autofocus": "autofocus",
     "onkeyup": keyHandler,
 
-}), 'left-bottom', "10px", "100px");
+}), 'right-top', "320px", "10px");
 
 function keyHandler(e){
-
+    if(e.ctrlKey && e.keyCode===13){
+        Command.getCmds(robot, e.target.value);
+    }
 }

@@ -69,15 +69,6 @@ function Command(master, name, func, args){
     else this.args = args;
 }
 
-Command.getCmds = function(master, cmdStrs){
-    return cmdStrs.split("\r\n").map(function(cmdStr){
-        var cmd = new Command();
-        cmd.setMaster(master);
-        cmd.parse(cmdStr);
-        return cmd;
-    });
-};
-
 Command.prototype = {
     setMaster: function(master){
         this.master = master;
@@ -86,7 +77,10 @@ Command.prototype = {
         this.args.push(arg);
     },
     exe: function(){
-        if(this.func)this.func.apply(this.master, this.args);
+        if(this.func){
+            this.func.apply(this.master, this.args);
+            util.log(util.getEle("logger"), this.toString());
+        }
     },
     parse: function(str){
         var map = {};
@@ -99,18 +93,30 @@ Command.prototype = {
             key = mIter.next().value;
         }
         if(key){
+            var out = key.exec(str);
+            if(!this.name)this.name = out[1]
             this.func = map.get(key);
-            this.args = key.exec(str).slice(1);
+            this.args = out.slice(2);
         }else{
             util.err("无法解析该命令：" + str);
         }
     },
     toString: function(){
-        if(this.args.length > 0)return this.name + ":" + this.args.join(",");
-        else return this.name;
+        var str = this.master.toString() + "->" + this.name;
+        if(this.args.length > 0)str += ":" + this.args.join(",");
+        return str;
     }
 };
 util.defineConstructor(Command);
+
+Command.getCmds = function(master, cmdStrs){
+    return cmdStrs.split("\n").map(function(cmdStr){
+        var cmd = new Command(master);
+        cmd.parse(cmdStr);
+        cmd.exe();
+        // return cmd;
+    });
+};
 
 module.exports = Command;
 
@@ -295,6 +301,9 @@ Robot.prototype = {
     },
     getCmdMap: function() {
         return Robot.CmdMap;
+    },
+    toString: function(){
+        return 'Robot';
     }
 };
 util.defineConstructor(Robot);
@@ -303,20 +312,20 @@ util.defineConstructor(Robot);
 // 获取原型里面的方法时要在原型定义之后获取
 var cm = new Map();
 
-cm.set(/^go\s+(-?\d+)$/i, Robot.prototype.go);
-cm.set(/^back\s+(-?\d+)$/i, Robot.prototype.back);
-cm.set(/^turn\s+(-?\d+)$/i, Robot.prototype.turn);
+cm.set(/^(go)\s+(-?\d+)$/i, Robot.prototype.go);
+cm.set(/^(back)\s+(-?\d+)$/i, Robot.prototype.back);
+cm.set(/^(turn)\s+(-?\d+)$/i, Robot.prototype.turn);
 
-cm.set(/^go$/i, Robot.prototype.go);
-cm.set(/^back$/i, Robot.prototype.back);
-cm.set(/^turn$/i, Robot.prototype.turn);
-cm.set(/^turnLeft$/i, Robot.prototype.turnLeft);
-cm.set(/^turnRight$/i, Robot.prototype.turnRight);
-cm.set(/^turnBack$/i, Robot.prototype.turnBack);
+cm.set(/^(go)$/i, Robot.prototype.go);
+cm.set(/^(back)$/i, Robot.prototype.back);
+cm.set(/^(turn)$/i, Robot.prototype.turn);
+cm.set(/^(turnLeft)$/i, Robot.prototype.turnLeft);
+cm.set(/^(turnRight)$/i, Robot.prototype.turnRight);
+cm.set(/^(turnBack)$/i, Robot.prototype.turnBack);
 
-cm.set(/^turn\s+l(eft)?$/i, Robot.prototype.turnLeft);
-cm.set(/^turn\s+r(ight)?$/i, Robot.prototype.turnRight);
-cm.set(/^turn\s+b(ack)?$/i, Robot.prototype.turnBack);
+cm.set(/^(turn)\s+(l|left)$/i, Robot.prototype.turnLeft);
+cm.set(/^(turn)\s+(r|right)$/i, Robot.prototype.turnRight);
+cm.set(/^(turn)\s+(b|back)$/i, Robot.prototype.turnBack);
 
 Robot.CmdMap = cm;
 
@@ -372,7 +381,6 @@ function clickHandler(e) {
     var cmd = new Command(robot, ele.id);
     cmd.parse(ele.id + " " + ele.value);
     cmd.exe();
-    util.log(util.getEle("logger"), cmd.toString());
 }
 
 util.append(document.body, util.createEle("div", {
@@ -380,7 +388,7 @@ util.append(document.body, util.createEle("div", {
     "className": "logger",
     "style": {
         "width": "300px",
-        "height": "800px"
+        "height": "600px"
     }
 }), 'right-top', "10px", "10px");
 
@@ -389,17 +397,18 @@ util.append(document.body, util.createEle("textarea", {
     "id": "cmdarea",
     "className": "cmdarea",
     "placeholder": "请输入要执行的命令",
-    "cols": 30,
+    "cols": 20,
     "rows": 5,
     "autofocus": "autofocus",
     "onkeyup": keyHandler,
 
-}), 'left-bottom', "10px", "100px");
+}), 'right-top', "320px", "10px");
 
 function keyHandler(e){
-
+    if(e.ctrlKey && e.keyCode===13){
+        Command.getCmds(robot, e.target.value);
+    }
 }
-
 },{"./Board":1,"./Command":3,"./Direction":4,"./Pointer":5,"./Robot":6,"./util":8}],8:[function(require,module,exports){
 var util = {
     defineConstructor: function(ClassObject) {

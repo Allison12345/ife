@@ -9,6 +9,7 @@ http.createServer(function(req, res) {
     var extension = file.substring(file.lastIndexOf('.'));
     var type = mime[extension];
     fs.readFile('.' + file, function(err, data) {
+        console.log(file);
         if (err) {
             res.writeHead(404, {
                 'Content-Type': 'text/plain'

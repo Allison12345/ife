@@ -102,6 +102,9 @@ Robot.prototype = {
     },
     getCmdMap: function() {
         return Robot.CmdMap;
+    },
+    toString: function(){
+        return 'Robot';
     }
 };
 util.defineConstructor(Robot);
@@ -110,20 +113,20 @@ util.defineConstructor(Robot);
 // 获取原型里面的方法时要在原型定义之后获取
 var cm = new Map();
 
-cm.set(/^go\s+(-?\d+)$/i, Robot.prototype.go);
-cm.set(/^back\s+(-?\d+)$/i, Robot.prototype.back);
-cm.set(/^turn\s+(-?\d+)$/i, Robot.prototype.turn);
+cm.set(/^(go)\s+(-?\d+)$/i, Robot.prototype.go);
+cm.set(/^(back)\s+(-?\d+)$/i, Robot.prototype.back);
+cm.set(/^(turn)\s+(-?\d+)$/i, Robot.prototype.turn);
 
-cm.set(/^go$/i, Robot.prototype.go);
-cm.set(/^back$/i, Robot.prototype.back);
-cm.set(/^turn$/i, Robot.prototype.turn);
-cm.set(/^turnLeft$/i, Robot.prototype.turnLeft);
-cm.set(/^turnRight$/i, Robot.prototype.turnRight);
-cm.set(/^turnBack$/i, Robot.prototype.turnBack);
+cm.set(/^(go)$/i, Robot.prototype.go);
+cm.set(/^(back)$/i, Robot.prototype.back);
+cm.set(/^(turn)$/i, Robot.prototype.turn);
+cm.set(/^(turnLeft)$/i, Robot.prototype.turnLeft);
+cm.set(/^(turnRight)$/i, Robot.prototype.turnRight);
+cm.set(/^(turnBack)$/i, Robot.prototype.turnBack);
 
-cm.set(/^turn\s+l(eft)?$/i, Robot.prototype.turnLeft);
-cm.set(/^turn\s+r(ight)?$/i, Robot.prototype.turnRight);
-cm.set(/^turn\s+b(ack)?$/i, Robot.prototype.turnBack);
+cm.set(/^(turn)\s+(l|left)$/i, Robot.prototype.turnLeft);
+cm.set(/^(turn)\s+(r|right)$/i, Robot.prototype.turnRight);
+cm.set(/^(turn)\s+(b|back)$/i, Robot.prototype.turnBack);
 
 Robot.CmdMap = cm;
 

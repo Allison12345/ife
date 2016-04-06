@@ -8,15 +8,6 @@ function Command(master, name, func, args){
     else this.args = args;
 }
 
-Command.getCmds = function(master, cmdStrs){
-    return cmdStrs.split("\r\n").map(function(cmdStr){
-        var cmd = new Command();
-        cmd.setMaster(master);
-        cmd.parse(cmdStr);
-        return cmd;
-    });
-};
-
 Command.prototype = {
     setMaster: function(master){
         this.master = master;
@@ -25,7 +16,10 @@ Command.prototype = {
         this.args.push(arg);
     },
     exe: function(){
-        if(this.func)this.func.apply(this.master, this.args);
+        if(this.func){
+            this.func.apply(this.master, this.args);
+            util.log(util.getEle("logger"), this.toString());
+        }
     },
     parse: function(str){
         var map = {};
@@ -38,17 +32,29 @@ Command.prototype = {
             key = mIter.next().value;
         }
         if(key){
+            var out = key.exec(str);
+            if(!this.name)this.name = out[1]
             this.func = map.get(key);
-            this.args = key.exec(str).slice(1);
+            this.args = out.slice(2);
         }else{
             util.err("无法解析该命令：" + str);
         }
     },
     toString: function(){
-        if(this.args.length > 0)return this.name + ":" + this.args.join(",");
-        else return this.name;
+        var str = this.master.toString() + "->" + this.name;
+        if(this.args.length > 0)str += ":" + this.args.join(",");
+        return str;
     }
 };
 util.defineConstructor(Command);
+
+Command.getCmds = function(master, cmdStrs){
+    return cmdStrs.split("\n").map(function(cmdStr){
+        var cmd = new Command(master);
+        cmd.parse(cmdStr);
+        cmd.exe();
+        // return cmd;
+    });
+};
 
 module.exports = Command;
