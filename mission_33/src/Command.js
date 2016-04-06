@@ -1,11 +1,11 @@
 var util = require('./util');
 
-function Command(name, func, args, master){
-    this.name = name;
-    this.func = func;
+function Command(master, name, func, args){
+    this.master = master;
+    if(name)this.name = name;
+    if(func)this.func = func;
     if(!args) this.args = [];
     else this.args = args;
-    if(master)this.master = master;
 }
 
 Command.getCmds = function(master, cmdStrs){
@@ -25,25 +25,28 @@ Command.prototype = {
         this.args.push(arg);
     },
     exe: function(){
-        this.func.apply(this.master, this.args);
+        if(this.func)this.func.apply(this.master, this.args);
     },
     parse: function(str){
         var map = {};
         if(this.master)map = this.master.getCmdMap();
         str = util.trim(str);
-        // for(var v of map){
-        //     if(v[0].test(str))break;
-        // }
         var mIter = map.keys();
-        var key = mapIter.next().value;
+        var key = mIter.next().value;
         while(key){
             if(key.test(str))break;
-            key = mapIter.next().value;
+            key = mIter.next().value;
         }
-        this.func = map.get(key);
+        if(key){
+            this.func = map.get(key);
+            this.args = key.exec(str).slice(1);
+        }else{
+            util.err("无法解析该命令：" + str);
+        }
     },
     toString: function(){
-        return this.name;
+        if(this.args.length > 0)return this.name + ":" + this.args.join(",");
+        else return this.name;
     }
 };
 util.defineConstructor(Command);

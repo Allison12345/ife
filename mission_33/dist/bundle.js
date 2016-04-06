@@ -29,7 +29,7 @@ util.defineConstructor(Board);
 
 module.exports = Board;
 
-},{"./Pointer":4,"./util":7}],2:[function(require,module,exports){
+},{"./Pointer":5,"./util":8}],2:[function(require,module,exports){
 var Pointer = require('./Pointer');
 var util = require('./util');
 
@@ -58,7 +58,63 @@ util.defineConstructor(Boundry);
 
 module.exports = Boundry;
 
-},{"./Pointer":4,"./util":7}],3:[function(require,module,exports){
+},{"./Pointer":5,"./util":8}],3:[function(require,module,exports){
+var util = require('./util');
+
+function Command(master, name, func, args){
+    this.master = master;
+    if(name)this.name = name;
+    if(func)this.func = func;
+    if(!args) this.args = [];
+    else this.args = args;
+}
+
+Command.getCmds = function(master, cmdStrs){
+    return cmdStrs.split("\r\n").map(function(cmdStr){
+        var cmd = new Command();
+        cmd.setMaster(master);
+        cmd.parse(cmdStr);
+        return cmd;
+    });
+};
+
+Command.prototype = {
+    setMaster: function(master){
+        this.master = master;
+    },
+    addArg: function(arg){
+        this.args.push(arg);
+    },
+    exe: function(){
+        if(this.func)this.func.apply(this.master, this.args);
+    },
+    parse: function(str){
+        var map = {};
+        if(this.master)map = this.master.getCmdMap();
+        str = util.trim(str);
+        var mIter = map.keys();
+        var key = mIter.next().value;
+        while(key){
+            if(key.test(str))break;
+            key = mIter.next().value;
+        }
+        if(key){
+            this.func = map.get(key);
+            this.args = key.exec(str).slice(1);
+        }else{
+            util.err("无法解析该命令：" + str);
+        }
+    },
+    toString: function(){
+        if(this.args.length > 0)return this.name + ":" + this.args.join(",");
+        else return this.name;
+    }
+};
+util.defineConstructor(Command);
+
+module.exports = Command;
+
+},{"./util":8}],4:[function(require,module,exports){
 var util = require('./util');
 var Pointer = require('./Pointer');
 
@@ -102,7 +158,7 @@ util.defineConstructor(Direction);
 
 module.exports = Direction;
 
-},{"./Pointer":4,"./util":7}],4:[function(require,module,exports){
+},{"./Pointer":5,"./util":8}],5:[function(require,module,exports){
 var util = require('./util');
 
 function Pointer(x, y){
@@ -134,7 +190,7 @@ util.defineConstructor(Pointer);
 
 module.exports = Pointer;
 
-},{"./util":7}],5:[function(require,module,exports){
+},{"./util":8}],6:[function(require,module,exports){
 var Pointer = require('./Pointer');
 var Direction = require('./Direction');
 var Boundary = require('./Boundary');
@@ -155,18 +211,9 @@ function Robot(direction, pointer, runningSpeed, rotatingSpeed) {
     else this.rotatingSpeed = rotatingSpeed;
 }
 
-var cm = new Map();
-cm.set(/^go(\s)+(-)?(\d)*$/i, Robot.prototype.go);
-cm.set(/^back(\s)+(-)?(\d)*$/i, Robot.prototype.back);
-cm.set(/^turn(\s)+(-)?(\d)*/i, Robot.prototype.turn);
-cm.set(/^turn(\s)*l(eft)?$/i, Robot.prototype.turnLeft);
-cm.set(/^turn(\s)*r(ight)?$/i, Robot.prototype.turnRight);
-cm.set(/^turn(\s)*b(ack)?$/i, Robot.prototype.turnBack);
-Robot.CmdMap = cm;
-
 Robot.prototype = {
     go: function(step) {
-        if(!step) step = 1;
+        if (!step) step = 1;
         if (step > 0) {
             this.updatePointerView(this.pointer.clone(), Math.abs(step) / this.runningSpeed, 1);
         } else if (step < 0) {
@@ -174,7 +221,7 @@ Robot.prototype = {
         }
     },
     back: function(step) {
-        if(!step) step = 1;
+        if (!step) step = 1;
         if (step > 0) {
             this.updatePointerView(this.pointer.clone(), Math.abs(step) / this.runningSpeed, -1);
         } else if (step < 0) {
@@ -184,19 +231,11 @@ Robot.prototype = {
     //逆时针旋转
     turn: function() {
         var arg = arguments[0];
-        if(!arg) arg = 90;
-        if (typeof arg === 'number') {
-            if (arg > 0) {
-                this.updateDirectionView(this.direction.clone(), Math.abs(arg) / this.rotatingSpeed, 1);
-            } else if (arg < 0) {
-                this.updateDirectionView(this.direction.clone(), Math.abs(arg) / this.rotatingSpeed, -1);
-            }
-        } else if (typeof arg === 'string') {
-            if (typeof arguments[1] === 'number') {
-
-            } else {
-
-            }
+        if (!arg) arg = 90;
+        if (arg > 0) {
+            this.updateDirectionView(this.direction.clone(), Math.abs(arg) / this.rotatingSpeed, 1);
+        } else if (arg < 0) {
+            this.updateDirectionView(this.direction.clone(), Math.abs(arg) / this.rotatingSpeed, -1);
         }
     },
     turnRight: function() {
@@ -260,11 +299,33 @@ Robot.prototype = {
 };
 util.defineConstructor(Robot);
 
+// 不要写嵌套结构的正则表达式
+// 获取原型里面的方法时要在原型定义之后获取
+var cm = new Map();
+
+cm.set(/^go\s+(-?\d+)$/i, Robot.prototype.go);
+cm.set(/^back\s+(-?\d+)$/i, Robot.prototype.back);
+cm.set(/^turn\s+(-?\d+)$/i, Robot.prototype.turn);
+
+cm.set(/^go$/i, Robot.prototype.go);
+cm.set(/^back$/i, Robot.prototype.back);
+cm.set(/^turn$/i, Robot.prototype.turn);
+cm.set(/^turnLeft$/i, Robot.prototype.turnLeft);
+cm.set(/^turnRight$/i, Robot.prototype.turnRight);
+cm.set(/^turnBack$/i, Robot.prototype.turnBack);
+
+cm.set(/^turn\s+l(eft)?$/i, Robot.prototype.turnLeft);
+cm.set(/^turn\s+r(ight)?$/i, Robot.prototype.turnRight);
+cm.set(/^turn\s+b(ack)?$/i, Robot.prototype.turnBack);
+
+Robot.CmdMap = cm;
+
 module.exports = Robot;
 
-},{"./Boundary":2,"./Direction":3,"./Pointer":4,"./util":7}],6:[function(require,module,exports){
+},{"./Boundary":2,"./Direction":4,"./Pointer":5,"./util":8}],7:[function(require,module,exports){
 var Board = require('./Board');
 var Robot = require('./Robot');
+var Command = require('./Command');
 var Direction = require('./Direction');
 var Pointer = require('./Pointer');
 var util = require('./util');
@@ -276,12 +337,14 @@ util.append(document.body, board.createBoardView("board", 'url("./img/bg.png")')
 
 util.append(document.body, util.createEle("button", {
     "id": "go",
+    "value": 2,
     "className": "btn go",
     "onclick": clickHandler
 }, "go"), 'left-bottom', "10px", "40px");
 
 util.append(document.body, util.createEle("button", {
     "id": "back",
+    "value": "3",
     "className": "btn back",
     "onclick": clickHandler
 }, "back"), 'left-bottom', "100px", "40px");
@@ -305,9 +368,11 @@ util.append(document.body, util.createEle("button", {
 }, "turnBack"), 'left-bottom', 190, 10, "px");
 
 function clickHandler(e) {
-    var action = e.target.id;
-    robot[action]();
-    util.log(util.getEle("logger"), action);
+    var ele = e.target;
+    var cmd = new Command(robot, ele.id);
+    cmd.parse(ele.id + " " + ele.value);
+    cmd.exe();
+    util.log(util.getEle("logger"), cmd.toString());
 }
 
 util.append(document.body, util.createEle("div", {
@@ -335,34 +400,54 @@ function keyHandler(e){
 
 }
 
-// util.getEle("go").addEventListener('click', function(e) {
-//     robot.go(1);
-//     util.log(util.getEle("logger"), "robot go 1", "red");
-// });
-// util.getEle("back").addEventListener('click', function(e) {
-//     robot.back(1);
-//     util.log(util.getEle("logger"), "robot back 1", "red");
-// });
-// util.getEle("turnLeft").addEventListener('click', function(e) {
-//     robot.turnLeft();
-//     util.log(util.getEle("logger"), "robot turn left", "orange");
-// });
-// util.getEle("turnRight").addEventListener('click', function(e) {
-//     robot.turnRight();
-//     util.log(util.getEle("logger"), "robot turn right", "orange");
-// });
-// util.getEle("turnBack").addEventListener('click', function(e) {
-//     robot.turnBack();
-//     util.log(util.getEle("logger"), "robot turn back", "orange");
-// });
-
-},{"./Board":1,"./Direction":3,"./Pointer":4,"./Robot":5,"./util":7}],7:[function(require,module,exports){
+},{"./Board":1,"./Command":3,"./Direction":4,"./Pointer":5,"./Robot":6,"./util":8}],8:[function(require,module,exports){
 var util = {
     defineConstructor: function(ClassObject) {
         Object.defineProperty(ClassObject.prototype, 'constructor', {
             value: ClassObject,
             enumerable: false
         });
+    },
+    createStyle: function(arg){
+        var style = {};
+        if(typeof arg === 'string'){
+            style.forCSS = function(){
+                return arg;
+            };
+            style.forJS = function(){
+                return this.css2jsStyle(arg);
+            }.bind(this);
+        }else if(typeof arg === 'object'){
+            style.forCSS = function(){
+                return this.js2cssStyle(arg);
+            }.bind(this);
+            style.forJS = function(){
+                return arg;
+            };
+        }
+        return style;
+    },
+    css2jsStyle: function(styleStr){
+        var style = {};
+        var props = styleStr.split(";");
+        for(var i = 0; i < props.length; i++){
+            var prop = props[i];
+            var kv = prop.split(":");
+            var key = kv[0].replace(/-([a-z])/, function(match, p1, offset, string){
+                return p1.toUpperCase();
+            });
+            style[key] = kv[1];
+        }
+        return style;
+    },
+    js2cssStyle: function(styleObj){
+        var style = [];
+        for(var key in styleObj){
+            style.push(key.replace(/([a-z])([A-Z])/, function(match, p1, p2, offset, string){
+                return p1 + '-' + p2.toLowerCase();
+            }) + ":" + styleObj[key]);
+        }
+        return style.join(";");
     },
     createEle: function(name, attrs, text) {
         var ele = document.createElement(name);
@@ -415,18 +500,27 @@ var util = {
         }
     },
     log: function(container, str, color) {
-        var timeP = this.createEle("p", {
-            "className": "logTime"
-        }, new Date().toLocaleString());
         if (!color) color = 'white';
-        var logP = this.createEle("p", {
-            'style': {
+        var timeStr = new Date().toLocaleString(),
+            timeStyle = "font-size:0.8em;color:green",
+            logStyle = {
                 'color': color,
                 'marginBottom': '0.5em'
-            }
-        }, str);
-        container.appendChild(timeP);
-        container.appendChild(logP);
+            };
+        if (container) {
+            container.appendChild(this.createEle("p", {
+                'style': this.createStyle(timeStyle).forJS()
+            }, timeStr));
+            container.appendChild(this.createEle("p", {
+                'style': this.createStyle(logStyle).forJS()
+            }, str));
+        } else {
+            console.log("%c" + timeStr, this.createStyle(timeStyle).forCSS());
+            console.log("%c" + str, this.createStyle(logStyle).forCSS());
+        }
+    },
+    err: function(str, container){
+        this.log(container, str, 'red');
     },
     'defaultValues': {
         'unit': 50,
@@ -436,4 +530,4 @@ var util = {
 
 module.exports = util;
 
-},{}]},{},[6]);
+},{}]},{},[7]);

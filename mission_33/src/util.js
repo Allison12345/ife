@@ -5,6 +5,47 @@ var util = {
             enumerable: false
         });
     },
+    createStyle: function(arg){
+        var style = {};
+        if(typeof arg === 'string'){
+            style.forCSS = function(){
+                return arg;
+            };
+            style.forJS = function(){
+                return this.css2jsStyle(arg);
+            }.bind(this);
+        }else if(typeof arg === 'object'){
+            style.forCSS = function(){
+                return this.js2cssStyle(arg);
+            }.bind(this);
+            style.forJS = function(){
+                return arg;
+            };
+        }
+        return style;
+    },
+    css2jsStyle: function(styleStr){
+        var style = {};
+        var props = styleStr.split(";");
+        for(var i = 0; i < props.length; i++){
+            var prop = props[i];
+            var kv = prop.split(":");
+            var key = kv[0].replace(/-([a-z])/, function(match, p1, offset, string){
+                return p1.toUpperCase();
+            });
+            style[key] = kv[1];
+        }
+        return style;
+    },
+    js2cssStyle: function(styleObj){
+        var style = [];
+        for(var key in styleObj){
+            style.push(key.replace(/([a-z])([A-Z])/, function(match, p1, p2, offset, string){
+                return p1 + '-' + p2.toLowerCase();
+            }) + ":" + styleObj[key]);
+        }
+        return style.join(";");
+    },
     createEle: function(name, attrs, text) {
         var ele = document.createElement(name);
         this.recurAssign(ele, attrs);
@@ -56,18 +97,27 @@ var util = {
         }
     },
     log: function(container, str, color) {
-        var timeP = this.createEle("p", {
-            "className": "logTime"
-        }, new Date().toLocaleString());
         if (!color) color = 'white';
-        var logP = this.createEle("p", {
-            'style': {
+        var timeStr = new Date().toLocaleString(),
+            timeStyle = "font-size:0.8em;color:green",
+            logStyle = {
                 'color': color,
                 'marginBottom': '0.5em'
-            }
-        }, str);
-        container.appendChild(timeP);
-        container.appendChild(logP);
+            };
+        if (container) {
+            container.appendChild(this.createEle("p", {
+                'style': this.createStyle(timeStyle).forJS()
+            }, timeStr));
+            container.appendChild(this.createEle("p", {
+                'style': this.createStyle(logStyle).forJS()
+            }, str));
+        } else {
+            console.log("%c" + timeStr, this.createStyle(timeStyle).forCSS());
+            console.log("%c" + str, this.createStyle(logStyle).forCSS());
+        }
+    },
+    err: function(str, container){
+        this.log(container, str, 'red');
     },
     'defaultValues': {
         'unit': 50,

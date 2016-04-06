@@ -25,4 +25,6 @@ browserify ./src/app.js -o ./dist/bundle.js
 
 uglify ./dist/bundle.js -c -o ./dist/bundle.min.js
 
+node server.js
+
 ```

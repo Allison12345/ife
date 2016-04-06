@@ -1,5 +1,6 @@
 var Board = require('./Board');
 var Robot = require('./Robot');
+var Command = require('./Command');
 var Direction = require('./Direction');
 var Pointer = require('./Pointer');
 var util = require('./util');
@@ -11,12 +12,14 @@ util.append(document.body, board.createBoardView("board", 'url("./img/bg.png")')
 
 util.append(document.body, util.createEle("button", {
     "id": "go",
+    "value": 2,
     "className": "btn go",
     "onclick": clickHandler
 }, "go"), 'left-bottom', "10px", "40px");
 
 util.append(document.body, util.createEle("button", {
     "id": "back",
+    "value": "3",
     "className": "btn back",
     "onclick": clickHandler
 }, "back"), 'left-bottom', "100px", "40px");
@@ -40,9 +43,11 @@ util.append(document.body, util.createEle("button", {
 }, "turnBack"), 'left-bottom', 190, 10, "px");
 
 function clickHandler(e) {
-    var action = e.target.id;
-    robot[action]();
-    util.log(util.getEle("logger"), action);
+    var ele = e.target;
+    var cmd = new Command(robot, ele.id);
+    cmd.parse(ele.id + " " + ele.value);
+    cmd.exe();
+    util.log(util.getEle("logger"), cmd.toString());
 }
 
 util.append(document.body, util.createEle("div", {

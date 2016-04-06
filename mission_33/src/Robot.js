@@ -18,18 +18,9 @@ function Robot(direction, pointer, runningSpeed, rotatingSpeed) {
     else this.rotatingSpeed = rotatingSpeed;
 }
 
-var cm = new Map();
-cm.set(/^go(\s)+(-)?(\d)*$/i, Robot.prototype.go);
-cm.set(/^back(\s)+(-)?(\d)*$/i, Robot.prototype.back);
-cm.set(/^turn(\s)+(-)?(\d)*/i, Robot.prototype.turn);
-cm.set(/^turn(\s)*l(eft)?$/i, Robot.prototype.turnLeft);
-cm.set(/^turn(\s)*r(ight)?$/i, Robot.prototype.turnRight);
-cm.set(/^turn(\s)*b(ack)?$/i, Robot.prototype.turnBack);
-Robot.CmdMap = cm;
-
 Robot.prototype = {
     go: function(step) {
-        if(!step) step = 1;
+        if (!step) step = 1;
         if (step > 0) {
             this.updatePointerView(this.pointer.clone(), Math.abs(step) / this.runningSpeed, 1);
         } else if (step < 0) {
@@ -37,7 +28,7 @@ Robot.prototype = {
         }
     },
     back: function(step) {
-        if(!step) step = 1;
+        if (!step) step = 1;
         if (step > 0) {
             this.updatePointerView(this.pointer.clone(), Math.abs(step) / this.runningSpeed, -1);
         } else if (step < 0) {
@@ -47,19 +38,11 @@ Robot.prototype = {
     //逆时针旋转
     turn: function() {
         var arg = arguments[0];
-        if(!arg) arg = 90;
-        if (typeof arg === 'number') {
-            if (arg > 0) {
-                this.updateDirectionView(this.direction.clone(), Math.abs(arg) / this.rotatingSpeed, 1);
-            } else if (arg < 0) {
-                this.updateDirectionView(this.direction.clone(), Math.abs(arg) / this.rotatingSpeed, -1);
-            }
-        } else if (typeof arg === 'string') {
-            if (typeof arguments[1] === 'number') {
-
-            } else {
-
-            }
+        if (!arg) arg = 90;
+        if (arg > 0) {
+            this.updateDirectionView(this.direction.clone(), Math.abs(arg) / this.rotatingSpeed, 1);
+        } else if (arg < 0) {
+            this.updateDirectionView(this.direction.clone(), Math.abs(arg) / this.rotatingSpeed, -1);
         }
     },
     turnRight: function() {
@@ -122,5 +105,26 @@ Robot.prototype = {
     }
 };
 util.defineConstructor(Robot);
+
+// 不要写嵌套结构的正则表达式
+// 获取原型里面的方法时要在原型定义之后获取
+var cm = new Map();
+
+cm.set(/^go\s+(-?\d+)$/i, Robot.prototype.go);
+cm.set(/^back\s+(-?\d+)$/i, Robot.prototype.back);
+cm.set(/^turn\s+(-?\d+)$/i, Robot.prototype.turn);
+
+cm.set(/^go$/i, Robot.prototype.go);
+cm.set(/^back$/i, Robot.prototype.back);
+cm.set(/^turn$/i, Robot.prototype.turn);
+cm.set(/^turnLeft$/i, Robot.prototype.turnLeft);
+cm.set(/^turnRight$/i, Robot.prototype.turnRight);
+cm.set(/^turnBack$/i, Robot.prototype.turnBack);
+
+cm.set(/^turn\s+l(eft)?$/i, Robot.prototype.turnLeft);
+cm.set(/^turn\s+r(ight)?$/i, Robot.prototype.turnRight);
+cm.set(/^turn\s+b(ack)?$/i, Robot.prototype.turnBack);
+
+Robot.CmdMap = cm;
 
 module.exports = Robot;

@@ -11,10 +11,6 @@ div, p {
     overflow: auto;
     background: black;
 }
-.logTime {
-    font-size: 0.8em;
-    color: green;
-}
 
 .cmdarea {
     overflow: auto;
