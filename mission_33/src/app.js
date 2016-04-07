@@ -3,6 +3,8 @@ var Robot = require('./Robot');
 var Command = require('./Command');
 var Direction = require('./Direction');
 var Pointer = require('./Pointer');
+
+var dispatcher = require('./Dispatcher')();
 var util = require('./util');
 
 var board = new Board(10, 10);
@@ -46,7 +48,7 @@ function clickHandler(e) {
     var ele = e.target;
     var cmd = new Command(robot, ele.id);
     cmd.parse(ele.id + " " + ele.value);
-    cmd.exe();
+    dispatcher.bind(cmd);
 }
 
 util.append(document.body, util.createEle("div", {
@@ -72,6 +74,8 @@ util.append(document.body, util.createEle("textarea", {
 
 function keyHandler(e){
     if(e.ctrlKey && e.keyCode===13){
-        Command.getCmds(robot, e.target.value);
+        Command.getCmds(robot, e.target.value).forEach(function(cmd){
+            dispatcher.bind(cmd);
+        });        
     }
 }

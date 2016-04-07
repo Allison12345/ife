@@ -33,7 +33,7 @@ Command.prototype = {
         }
         if(key){
             var out = key.exec(str);
-            if(!this.name)this.name = out[1]
+            if(!this.name)this.name = out[1];
             this.func = map.get(key);
             this.args = out.slice(2);
         }else{
@@ -52,8 +52,7 @@ Command.getCmds = function(master, cmdStrs){
     return cmdStrs.split("\n").map(function(cmdStr){
         var cmd = new Command(master);
         cmd.parse(cmdStr);
-        cmd.exe();
-        // return cmd;
+        return cmd;
     });
 };
 
