@@ -1,6 +1,9 @@
+var util = require('./util');
+
 function SpaceShip(id){
     this.id = id;
     this.fuel = 0;
+    this.tank = 100;
     this.speed = 0;
     this.direction = 1;// 默认逆时针转动    
 }
@@ -11,7 +14,7 @@ SpaceShip.prototype = {
     },
     start: function(speed){
         this.speed = speed;
-        this.fuel -= 1;
+        if(this.fuel > 0)this.fuel -= 1;
     },
     stop: function(){
         this.speed = 0;
