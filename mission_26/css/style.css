@@ -1,33 +1,20 @@
-html,body,div{
+html, body, div {
     padding: 0;
     margin: 0;
 }
-
-.center{
+.center {
     position: absolute;
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
 }
-
-.universe{
-    background-color: black;   
-    
-    width: 800px;
-    height: 600px;
-    
+.universe {
+    background-color: black;
 }
-
-.star{
-    width: 300px;
-    height: 300px;
+.star {
     border-radius: 50%;
-    background-color: orange;    
+    background-color: orange;
 }
-
-.space{
-    width: 60px;
-    height: 20px;
-    border-radius: 10px;
+.ship {
     background-color: lightblue;
 }
