@@ -1,4 +1,33 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+var util = require('./util');
+var Factory = require('./Factory');
+
+function Command(name, id, universe, star) {
+    this.name = name;
+    this.ship = new Factory(require('./SpaceShip'), universe, star).getProduct(id);
+}
+
+Command.prototype = {
+    exe: function () {
+        switch (this.name) {
+            case 'init':
+                break;
+            case 'start':
+                this.ship.start(0.1);
+                break;
+            case 'stop':
+                this.ship.stop();
+                break;
+            case 'destroy':
+                this.ship.destroy();
+        }
+    }
+};
+util.defineConstructor(Command);
+
+module.exports = Command;
+
+},{"./Factory":3,"./SpaceShip":5,"./util":9}],2:[function(require,module,exports){
 function Coordinate(x, y){
     this.x = x;
     this.y = y;
@@ -17,7 +46,67 @@ Coordinate.prototype = {
 
 module.exports = Coordinate;
 
-},{}],2:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
+var util = require('./util');
+
+function Factory(Product, universe, star) {
+    this.Product = Product;
+    this.star = star;
+    this.universe = universe;
+    console.log(star);
+    console.log(universe);
+    this.products = [];
+}
+Factory.prototype = {
+    getAllProducts: function () {
+        return this.products;
+    },
+    getProduct: function (id) {
+        var i = 0;
+        for (; i < this.products.length; i++) {
+            if (id === this.products[i].id) break;
+        }
+        if (i < this.products.length) return this.products[i];
+        return this.createProduct(id);
+    },
+    createProduct: function () {
+        var product = new this.Product(60, 20).init(this.id, this.star.radius + 90, 0, this.star.center, {
+            x: 0,
+            y: this.universe.height
+        });
+        this.products.push(product);
+        this.universe.addEle(product);
+        return product;
+    }
+};
+util.defineConstructor(Factory);
+
+module.exports = Factory;
+
+},{"./util":9}],4:[function(require,module,exports){
+var util = require('./util');
+var Command = require('./Command');
+
+function Mediator() {
+    this.cmdQue = [];
+}
+Mediator.prototype = {
+    getCmd: function (cmdStr, id, universe, star) {
+        // 命令丢包率 30%
+        // if (Math.random() > 0.3) 
+        this.cmdQue.push(new Command(cmdStr, id, universe, star));
+    },
+    sendCmd: function () {
+        while (this.cmdQue.length > 0) {
+            this.cmdQue.shift().exe();
+        }
+    }
+};
+util.defineConstructor(Mediator);
+
+module.exports = Mediator;
+
+},{"./Command":1,"./util":9}],5:[function(require,module,exports){
 var util = require('./util');
 
 function SpaceShip(w, h) {
@@ -43,11 +132,7 @@ SpaceShip.prototype = {
                 borderRadius: (this.height) / 2 + 'px'
             }
         });
-        if (this.mode === 1) {
-            this.view.style.transform = 'rotate(' + util.cycle((90 - this.angle)) + 'deg)';
-        } else if (this.mode === -1) {
-            this.view.style.transform = null;
-        }
+        this.adjust();
         return this;
     },
     start: function(velocity) {
@@ -58,7 +143,7 @@ SpaceShip.prototype = {
     },
     stop: function() {
         this.velocity = 0;
-        this.originAngle = thia.angle;
+        this.originAngle = this.angle;
     },
     destroy: function() {
 
@@ -79,15 +164,18 @@ SpaceShip.prototype = {
                 var lt = that.getCoordinate().toLT(that.referPoint.x, that.referPoint.y);
                 that.view.style.left = lt.left;
                 that.view.style.top = lt.top;
-                if (that.mode === 1) {
-                    that.view.style.transform = 'rotate(' + util.cycle((90 - that.angle)) + 'deg)';
-                } else if (that.mode === -1) {
-                    that.view.style.transform = null;
-                }
+                that.adjust();
                 window.requestAnimationFrame(turn);
             }
         }
         window.requestAnimationFrame(turn);
+    },
+    adjust: function() {
+        if (this.mode === 1) {
+            this.view.style.transform = 'rotate(' + util.cycle((90 - this.angle)) + 'deg)';
+        } else if (this.mode === -1) {
+            this.view.style.transform = null;
+        }
     },
     changeMode: function() {
         this.mode *= -1;
@@ -112,7 +200,7 @@ SpaceShip.TANK = 100;
 
 module.exports = SpaceShip;
 
-},{"./util":6}],3:[function(require,module,exports){
+},{"./util":9}],6:[function(require,module,exports){
 var util = require('./util');
 var Coordinate = require('./Coordinate');
 
@@ -142,7 +230,7 @@ util.defineConstructor(Star);
 
 module.exports = Star;
 
-},{"./Coordinate":1,"./util":6}],4:[function(require,module,exports){
+},{"./Coordinate":2,"./util":9}],7:[function(require,module,exports){
 var util = require('./util');
 
 function Universe(w, h) {
@@ -169,34 +257,29 @@ util.defineConstructor(Universe);
 
 module.exports = Universe;
 
-},{"./util":6}],5:[function(require,module,exports){
+},{"./util":9}],8:[function(require,module,exports){
 var Universe = require('./Universe');
 var Star = require('./Star');
 var SpaceShip = require('./SpaceShip');
-// var Mediator = require('./Mediator');
+var Mediator = require('./Mediator');
 var util = require('./util');
 
 var universe = new Universe(800, 600);
 var star = new Star(150);
 universe.addStar(star);
-var ship = new SpaceShip(60, 20).init(1, star.radius + 90, 0, star.center, {
-    x: 0,
-    y: universe.height
-});
-universe.addEle(ship);
-
-// var connector = new Mediator();
-// var id = 0;
-//
-// util.get("init").addListener('click', mouseHandler);
+var connector = new Mediator();
+var id = 0;
+util.get("init").addEventListener('click', mouseHandler);
 util.get("start").addEventListener('click', mouseHandler);
-// util.get("stop").addListener('click', mouseHandler);
-//
+util.get("stop").addEventListener('click', mouseHandler);
+util.get("destroy").addEventListener('click', mouseHandler);
 function mouseHandler(e) {
-    ship.start(0.1);
+    connector.getCmd(e.target.id, id, universe, star);
+    if(e.target.id === 'init')id++;
+    connector.sendCmd();
 }
 
-},{"./SpaceShip":2,"./Star":3,"./Universe":4,"./util":6}],6:[function(require,module,exports){
+},{"./Mediator":4,"./SpaceShip":5,"./Star":6,"./Universe":7,"./util":9}],9:[function(require,module,exports){
 module.exports = {
     get: function(id){
         return document.getElementById(id);
@@ -237,4 +320,4 @@ module.exports = {
     }
 };
 
-},{}]},{},[5]);
+},{}]},{},[8]);

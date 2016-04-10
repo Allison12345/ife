@@ -34,7 +34,7 @@ SpaceShip.prototype = {
     },
     stop: function() {
         this.velocity = 0;
-        this.originAngle = thia.angle;
+        this.originAngle = this.angle;
     },
     destroy: function() {
 
@@ -55,7 +55,7 @@ SpaceShip.prototype = {
                 var lt = that.getCoordinate().toLT(that.referPoint.x, that.referPoint.y);
                 that.view.style.left = lt.left;
                 that.view.style.top = lt.top;
-                this.adjust();
+                that.adjust();
                 window.requestAnimationFrame(turn);
             }
         }

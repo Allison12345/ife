@@ -7,18 +7,14 @@ var util = require('./util');
 var universe = new Universe(800, 600);
 var star = new Star(150);
 universe.addStar(star);
-var ship = new SpaceShip(60, 20).init(1, star.radius + 90, 0, star.center, {
-    x: 0,
-    y: universe.height
-});
-universe.addEle(ship);
 var connector = new Mediator();
-// var id = 0;
-//
-// util.get("init").addListener('click', mouseHandler);
+var id = 0;
+util.get("init").addEventListener('click', mouseHandler);
 util.get("start").addEventListener('click', mouseHandler);
-// util.get("stop").addListener('click', mouseHandler);
-//
+util.get("stop").addEventListener('click', mouseHandler);
+util.get("destroy").addEventListener('click', mouseHandler);
 function mouseHandler(e) {
-    ship.start(0.1);
+    connector.getCmd(e.target.id, id, universe, star);
+    if(e.target.id === 'init')id++;
+    connector.sendCmd();
 }
