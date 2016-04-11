@@ -1,10 +1,9 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 var util = require('./util');
-var Factory = require('./Factory');
 
-function Command(name, id, universe, star) {
+function Command(name, id, factory) {
     this.name = name;
-    this.ship = new Factory(require('./SpaceShip'), universe, star).getProduct(id);
+    this.ship = factory.getProduct(id);
 }
 
 Command.prototype = {
@@ -27,7 +26,7 @@ util.defineConstructor(Command);
 
 module.exports = Command;
 
-},{"./Factory":3,"./SpaceShip":5,"./util":9}],2:[function(require,module,exports){
+},{"./util":9}],2:[function(require,module,exports){
 function Coordinate(x, y){
     this.x = x;
     this.y = y;
@@ -53,8 +52,6 @@ function Factory(Product, universe, star) {
     this.Product = Product;
     this.star = star;
     this.universe = universe;
-    console.log(star);
-    console.log(universe);
     this.products = [];
 }
 Factory.prototype = {
@@ -69,8 +66,8 @@ Factory.prototype = {
         if (i < this.products.length) return this.products[i];
         return this.createProduct(id);
     },
-    createProduct: function () {
-        var product = new this.Product(60, 20).init(this.id, this.star.radius + 90, 0, this.star.center, {
+    createProduct: function (id) {
+        var product = new this.Product(60, 20).init(id, this.star.radius + 90, 0, this.star.center, {
             x: 0,
             y: this.universe.height
         });
@@ -86,15 +83,17 @@ module.exports = Factory;
 },{"./util":9}],4:[function(require,module,exports){
 var util = require('./util');
 var Command = require('./Command');
+var Factory = require('./Factory');
 
-function Mediator() {
+function Mediator(universe, star) {
     this.cmdQue = [];
+    this.shipFactory = new Factory(require('./SpaceShip'), universe, star);
 }
 Mediator.prototype = {
-    getCmd: function (cmdStr, id, universe, star) {
+    getCmd: function (cmdStr, id) {
         // 命令丢包率 30%
-        // if (Math.random() > 0.3) 
-        this.cmdQue.push(new Command(cmdStr, id, universe, star));
+        // if (Math.random() > 0.3)
+        this.cmdQue.push(new Command(cmdStr, id, this.shipFactory));
     },
     sendCmd: function () {
         while (this.cmdQue.length > 0) {
@@ -106,7 +105,7 @@ util.defineConstructor(Mediator);
 
 module.exports = Mediator;
 
-},{"./Command":1,"./util":9}],5:[function(require,module,exports){
+},{"./Command":1,"./Factory":3,"./SpaceShip":5,"./util":9}],5:[function(require,module,exports){
 var util = require('./util');
 
 function SpaceShip(w, h) {
@@ -131,7 +130,7 @@ SpaceShip.prototype = {
                 height: this.height + 'px',
                 borderRadius: (this.height) / 2 + 'px'
             }
-        });
+        }, id);
         this.adjust();
         return this;
     },
@@ -267,15 +266,15 @@ var util = require('./util');
 var universe = new Universe(800, 600);
 var star = new Star(150);
 universe.addStar(star);
-var connector = new Mediator();
+var connector = new Mediator(universe, star);
 var id = 0;
 util.get("init").addEventListener('click', mouseHandler);
 util.get("start").addEventListener('click', mouseHandler);
 util.get("stop").addEventListener('click', mouseHandler);
 util.get("destroy").addEventListener('click', mouseHandler);
-function mouseHandler(e) {
-    connector.getCmd(e.target.id, id, universe, star);
+function mouseHandler(e) {    
     if(e.target.id === 'init')id++;
+    connector.getCmd(e.target.id, id);
     connector.sendCmd();
 }
 

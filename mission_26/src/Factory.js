@@ -4,8 +4,6 @@ function Factory(Product, universe, star) {
     this.Product = Product;
     this.star = star;
     this.universe = universe;
-    console.log(star);
-    console.log(universe);
     this.products = [];
 }
 Factory.prototype = {
@@ -20,8 +18,8 @@ Factory.prototype = {
         if (i < this.products.length) return this.products[i];
         return this.createProduct(id);
     },
-    createProduct: function () {
-        var product = new this.Product(60, 20).init(this.id, this.star.radius + 90, 0, this.star.center, {
+    createProduct: function (id) {
+        var product = new this.Product(60, 20).init(id, this.star.radius + 90, 0, this.star.center, {
             x: 0,
             y: this.universe.height
         });

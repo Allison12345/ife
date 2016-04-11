@@ -1,9 +1,8 @@
 var util = require('./util');
-var Factory = require('./Factory');
 
-function Command(name, id, universe, star) {
+function Command(name, id, factory) {
     this.name = name;
-    this.ship = new Factory(require('./SpaceShip'), universe, star).getProduct(id);
+    this.ship = factory.getProduct(id);
 }
 
 Command.prototype = {

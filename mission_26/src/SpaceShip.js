@@ -22,7 +22,7 @@ SpaceShip.prototype = {
                 height: this.height + 'px',
                 borderRadius: (this.height) / 2 + 'px'
             }
-        });
+        }, id);
         this.adjust();
         return this;
     },
