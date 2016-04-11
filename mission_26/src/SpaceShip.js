@@ -5,7 +5,7 @@ function SpaceShip(w, h) {
     this.height = h;
 }
 SpaceShip.prototype = {
-    init: function(id, distance, angle, aroundCorner, referPoint) {
+    init: function (id, distance, angle, aroundCorner, referPoint) {
         this.id = id;
         this.distance = distance;
         this.originAngle = angle;
@@ -26,23 +26,21 @@ SpaceShip.prototype = {
         this.adjust();
         return this;
     },
-    start: function(velocity) {
-        if (velocity > 0) {
-            this.velocity = velocity; //角速度
-            this.updateView();
-        }
+    start: function () {
+        this.velocity = 0.1; //角速度
+        this.updateView();
     },
-    stop: function() {
+    stop: function () {
         this.velocity = 0;
         this.originAngle = this.angle;
     },
-    destroy: function() {
-
+    destroy: function (container) {
+        container.delEle(this);
     },
-    exeCmd: function(cmd) {
-
+    exeCmd: function (cmdName) {
+        this[cmdName] && this[cmdName]();
     },
-    updateView: function() {
+    updateView: function () {
         var that = this,
             start,
             progress;
@@ -61,27 +59,27 @@ SpaceShip.prototype = {
         }
         window.requestAnimationFrame(turn);
     },
-    adjust: function() {
+    adjust: function () {
         if (this.mode === 1) {
             this.view.style.transform = 'rotate(' + util.cycle((90 - this.angle)) + 'deg)';
         } else if (this.mode === -1) {
             this.view.style.transform = null;
         }
     },
-    changeMode: function() {
+    changeMode: function () {
         this.mode *= -1;
     },
-    changeDirection: function() {
+    changeDirection: function () {
         this.direction *= -1;
     },
-    getCenter: function() {
+    getCenter: function () {
         var ap = util.an2pi(this.angle);
         return this.aroundCorner.move(this.distance * Math.cos(ap), this.distance * Math.sin(ap));
     },
-    getView: function() {
+    getView: function () {
         return this.view;
     },
-    getCoordinate: function() {
+    getCoordinate: function () {
         return this.getCenter().move(-this.width / 2, this.height / 2);
     }
 };

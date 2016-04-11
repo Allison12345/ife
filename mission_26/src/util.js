@@ -14,6 +14,9 @@ module.exports = {
         ele.style.top = lt.top;
         if(container)container.appendChild(ele);
     },
+    remove: function(ele, container){
+        container.removeChild(ele);
+    },
     createDom: function(name, attrs, text) {
         var ele = document.createElement(name);
         if (attrs) this.recurAssign(ele, attrs);

@@ -3,23 +3,14 @@ var util = require('./util');
 
 function Command(name, id, factory) {
     this.name = name;
-    this.ship = factory.getProduct(id);
+    this.id = id;
+    this.factory = factory;
 }
 
 Command.prototype = {
     exe: function () {
-        switch (this.name) {
-            case 'init':
-                break;
-            case 'start':
-                this.ship.start(0.1);
-                break;
-            case 'stop':
-                this.ship.stop();
-                break;
-            case 'destroy':
-                this.ship.destroy();
-        }
+        console.log(this.factory.getAllProducts().length);
+        this.factory.operate(this.name, this.id);
     }
 };
 util.defineConstructor(Command);
@@ -27,6 +18,8 @@ util.defineConstructor(Command);
 module.exports = Command;
 
 },{"./util":9}],2:[function(require,module,exports){
+var util = require('./util');
+
 function Coordinate(x, y){
     this.x = x;
     this.y = y;
@@ -42,10 +35,11 @@ Coordinate.prototype = {
         return new Coordinate(this.x + x, this.y + y);
     }
 };
+util.defineConstructor(Coordinate);
 
 module.exports = Coordinate;
 
-},{}],3:[function(require,module,exports){
+},{"./util":9}],3:[function(require,module,exports){
 var util = require('./util');
 
 function Factory(Product, universe, star) {
@@ -58,13 +52,15 @@ Factory.prototype = {
     getAllProducts: function () {
         return this.products;
     },
-    getProduct: function (id) {
+    getProduct: function (id) {        
+        return this.products[this.getProductIndex(id)];
+    },
+    getProductIndex: function(id){
         var i = 0;
         for (; i < this.products.length; i++) {
             if (id === this.products[i].id) break;
         }
-        if (i < this.products.length) return this.products[i];
-        return this.createProduct(id);
+        return i;
     },
     createProduct: function (id) {
         var product = new this.Product(60, 20).init(id, this.star.radius + 90, 0, this.star.center, {
@@ -74,6 +70,21 @@ Factory.prototype = {
         this.products.push(product);
         this.universe.addEle(product);
         return product;
+    },
+    deleteProduct: function(id){
+        var index = this.getProductIndex(id);
+        this.products[index].destroy(this.universe);
+        this.products.splice(index, 1);
+    },
+    operate: function(cmdStr, id){
+        console.log(cmdStr, id);
+        if(cmdStr === 'init'){
+            this.createProduct(id);
+        }else if(cmdStr === 'destroy'){
+            this.deleteProduct(id);
+        }else {
+            this.getProduct(id).exeCmd(cmdStr);
+        }
     }
 };
 util.defineConstructor(Factory);
@@ -113,7 +124,7 @@ function SpaceShip(w, h) {
     this.height = h;
 }
 SpaceShip.prototype = {
-    init: function(id, distance, angle, aroundCorner, referPoint) {
+    init: function (id, distance, angle, aroundCorner, referPoint) {
         this.id = id;
         this.distance = distance;
         this.originAngle = angle;
@@ -134,23 +145,21 @@ SpaceShip.prototype = {
         this.adjust();
         return this;
     },
-    start: function(velocity) {
-        if (velocity > 0) {
-            this.velocity = velocity; //角速度
-            this.updateView();
-        }
+    start: function () {
+        this.velocity = 0.1; //角速度
+        this.updateView();
     },
-    stop: function() {
+    stop: function () {
         this.velocity = 0;
         this.originAngle = this.angle;
     },
-    destroy: function() {
-
+    destroy: function (container) {
+        container.delEle(this);
     },
-    exeCmd: function(cmd) {
-
+    exeCmd: function (cmdName) {
+        this[cmdName] && this[cmdName]();
     },
-    updateView: function() {
+    updateView: function () {
         var that = this,
             start,
             progress;
@@ -169,27 +178,27 @@ SpaceShip.prototype = {
         }
         window.requestAnimationFrame(turn);
     },
-    adjust: function() {
+    adjust: function () {
         if (this.mode === 1) {
             this.view.style.transform = 'rotate(' + util.cycle((90 - this.angle)) + 'deg)';
         } else if (this.mode === -1) {
             this.view.style.transform = null;
         }
     },
-    changeMode: function() {
+    changeMode: function () {
         this.mode *= -1;
     },
-    changeDirection: function() {
+    changeDirection: function () {
         this.direction *= -1;
     },
-    getCenter: function() {
+    getCenter: function () {
         var ap = util.an2pi(this.angle);
         return this.aroundCorner.move(this.distance * Math.cos(ap), this.distance * Math.sin(ap));
     },
-    getView: function() {
+    getView: function () {
         return this.view;
     },
-    getCoordinate: function() {
+    getCoordinate: function () {
         return this.getCenter().move(-this.width / 2, this.height / 2);
     }
 };
@@ -240,6 +249,9 @@ function Universe(w, h) {
 Universe.prototype = {
     addEle: function(ele) {
         util.draw(ele.getView(), ele.getCoordinate().toLT(0, this.height), this.view);
+    },
+    delEle: function(ele){
+        util.remove(ele.getView(), this.view);
     },
     addStar: function(star) {
         star.setCenter(this.width / 2, this.height / 2);
@@ -294,6 +306,9 @@ module.exports = {
         ele.style.left = lt.left;
         ele.style.top = lt.top;
         if(container)container.appendChild(ele);
+    },
+    remove: function(ele, container){
+        container.removeChild(ele);
     },
     createDom: function(name, attrs, text) {
         var ele = document.createElement(name);

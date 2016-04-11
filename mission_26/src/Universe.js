@@ -9,6 +9,9 @@ Universe.prototype = {
     addEle: function(ele) {
         util.draw(ele.getView(), ele.getCoordinate().toLT(0, this.height), this.view);
     },
+    delEle: function(ele){
+        util.remove(ele.getView(), this.view);
+    },
     addStar: function(star) {
         star.setCenter(this.width / 2, this.height / 2);
         this.addEle(star);
