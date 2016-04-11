@@ -1,3 +1,5 @@
+var util = require('./util');
+
 function Coordinate(x, y){
     this.x = x;
     this.y = y;
@@ -13,5 +15,6 @@ Coordinate.prototype = {
         return new Coordinate(this.x + x, this.y + y);
     }
 };
+util.defineConstructor(Coordinate);
 
 module.exports = Coordinate;
