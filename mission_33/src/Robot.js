@@ -19,42 +19,41 @@ function Robot(direction, pointer, runningSpeed, rotatingSpeed) {
 }
 
 Robot.prototype = {
-    go: function(step) {
+    go: function (step, dispatcher) {
         if (!step) step = 1;
         if (step > 0) {
-            this.updatePointerView(this.pointer.clone(), Math.abs(step) / this.runningSpeed, 1);
+            this.updatePointerView(this.pointer.clone(), Math.abs(step) / this.runningSpeed, 1, dispatcher);
         } else if (step < 0) {
             this.back(-step);
         }
     },
-    back: function(step) {
+    back: function (step, dispatcher) {
         if (!step) step = 1;
         if (step > 0) {
-            this.updatePointerView(this.pointer.clone(), Math.abs(step) / this.runningSpeed, -1);
+            this.updatePointerView(this.pointer.clone(), Math.abs(step) / this.runningSpeed, -1, dispatcher);
         } else if (step < 0) {
             this.go(-step);
         }
     },
     //逆时针旋转
-    turn: function() {
-        var arg = arguments[0];
-        if (!arg) arg = 90;
-        if (arg > 0) {
-            this.updateDirectionView(this.direction.clone(), Math.abs(arg) / this.rotatingSpeed, 1);
-        } else if (arg < 0) {
-            this.updateDirectionView(this.direction.clone(), Math.abs(arg) / this.rotatingSpeed, -1);
+    turn: function (angle, dispatcher) {
+        if (!angle) angle = 90;
+        if (angle > 0) {
+            this.updateDirectionView(this.direction.clone(), Math.abs(angle) / this.rotatingSpeed, 1, dispatcher);
+        } else if (angle < 0) {
+            this.updateDirectionView(this.direction.clone(), Math.abs(angle) / this.rotatingSpeed, -1, dispatcher);
         }
     },
-    turnRight: function() {
-        this.turn(-90);
+    turnRight: function (dispatcher) {
+        this.turn(-90, dispatcher);
     },
-    turnLeft: function() {
-        this.turn(90);
+    turnLeft: function (dispatcher) {
+        this.turn(90, dispatcher);
     },
-    turnBack: function() {
-        this.turn(180);
+    turnBack: function (dispatcher) {
+        this.turn(180, dispatcher);
     },
-    setView: function(id, imgSrc) {
+    setView: function (id, imgSrc) {
         this.view = util.createEle("img", {
             "id": id,
             "className": "robotView",
@@ -65,10 +64,9 @@ Robot.prototype = {
             }
         });
     },
-    updatePointerView: function(fromPointer, time, isPositive) {
+    updatePointerView: function (fromPointer, time, isPositive, dispatcher) {
         var start = null,
             that = this;
-
         function move(timestamp) {
             if (!start) start = timestamp;
             var progress = (timestamp - start).toFixed();
@@ -77,12 +75,13 @@ Robot.prototype = {
             that.view.style.left = util.getUnit(that.pointer.x);
             that.view.style.bottom = util.getUnit(that.pointer.y);
             if (progress < time) {
-                window.requestAnimationFrame(arguments.callee);
+                window.requestAnimationFrame(move);
+                dispatcher.start();
             }
         }
         window.requestAnimationFrame(move);
     },
-    updateDirectionView: function(fromDirection, time, isPositive) {
+    updateDirectionView: function (fromDirection, time, isPositive, dispatcher) {
         var start = null,
             that = this;
 
@@ -92,18 +91,19 @@ Robot.prototype = {
             that.direction = fromDirection.addAngle(Math.round(isPositive * progress * that.rotatingSpeed));
             that.view.style.transform = 'rotate(' + that.direction.forCSSRotation() + 'deg)';
             if (progress < time) {
-                window.requestAnimationFrame(arguments.callee);
+                window.requestAnimationFrame(rotate);
+                dispatcher.start();
             }
         }
         window.requestAnimationFrame(rotate);
     },
-    setBoundary: function(startPoint, endPoint) {
+    setBoundary: function (startPoint, endPoint) {
         this.boundary = new Boundary(startPoint, endPoint);
     },
-    getCmdMap: function() {
+    getCmdMap: function () {
         return Robot.CmdMap;
     },
-    toString: function(){
+    toString: function () {
         return 'Robot';
     }
 };

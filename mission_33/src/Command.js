@@ -15,8 +15,9 @@ Command.prototype = {
     addArg: function(arg){
         this.args.push(arg);
     },
-    exe: function(){
+    exe: function(dispatcher){
         if(this.func){
+            this.addArg(dispatcher);
             this.func.apply(this.master, this.args);
             util.log(util.getEle("logger"), this.toString());
         }
@@ -42,7 +43,7 @@ Command.prototype = {
     },
     toString: function(){
         var str = this.master.toString() + "->" + this.name;
-        if(this.args.length > 0)str += ":" + this.args.join(",");
+        if(this.args.length > 1)str += ":" + this.args.slice(0, 1).join(",");
         return str;
     }
 };

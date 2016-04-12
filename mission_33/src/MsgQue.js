@@ -8,7 +8,7 @@ MsgQue.prototype = {
     del: function(cmd) {
         for (var i = 0; i < this.msgs.length; i++) {
             if(cmd === this.msgs[i]){
-                this.msgs.splice(i);
+                this.msgs.splice(i, 1);
                 break;
             }
         }

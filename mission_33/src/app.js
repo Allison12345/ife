@@ -4,12 +4,14 @@ var Command = require('./Command');
 var Direction = require('./Direction');
 var Pointer = require('./Pointer');
 
-var dispatcher = require('./Dispatcher')();
+var Dispatcher = require('./Dispatcher');
 var util = require('./util');
 
 var board = new Board(10, 10);
 var robot = new Robot(new Direction(90), new Pointer(3, 4));
 board.drawRobot(robot);
+var dispatcher = new Dispatcher();
+
 util.append(document.body, board.createBoardView("board", 'url("./img/bg.png")'), 'left-top', 10, 10, true);
 
 util.append(document.body, util.createEle("button", {
@@ -72,10 +74,18 @@ util.append(document.body, util.createEle("textarea", {
 
 }), 'right-top', "320px", "10px");
 
+util.append(document.body, util.createEle("button", {
+    "id": "exe",
+    "className": "btn",
+    "onclick": function(){
+        dispatcher.start();
+    }
+}, "exe"), 'right-top', "350px", "140px");
+
 function keyHandler(e){
     if(e.ctrlKey && e.keyCode===13){
         Command.getCmds(robot, e.target.value).forEach(function(cmd){
             dispatcher.bind(cmd);
-        });        
+        });
     }
 }

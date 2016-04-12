@@ -29,7 +29,7 @@ util.defineConstructor(Board);
 
 module.exports = Board;
 
-},{"./Pointer":5,"./util":8}],2:[function(require,module,exports){
+},{"./Pointer":7,"./util":10}],2:[function(require,module,exports){
 var Pointer = require('./Pointer');
 var util = require('./util');
 
@@ -58,7 +58,7 @@ util.defineConstructor(Boundry);
 
 module.exports = Boundry;
 
-},{"./Pointer":5,"./util":8}],3:[function(require,module,exports){
+},{"./Pointer":7,"./util":10}],3:[function(require,module,exports){
 var util = require('./util');
 
 function Command(master, name, func, args){
@@ -76,8 +76,9 @@ Command.prototype = {
     addArg: function(arg){
         this.args.push(arg);
     },
-    exe: function(){
+    exe: function(dispatcher){
         if(this.func){
+            this.addArg(dispatcher);
             this.func.apply(this.master, this.args);
             util.log(util.getEle("logger"), this.toString());
         }
@@ -94,7 +95,7 @@ Command.prototype = {
         }
         if(key){
             var out = key.exec(str);
-            if(!this.name)this.name = out[1]
+            if(!this.name)this.name = out[1];
             this.func = map.get(key);
             this.args = out.slice(2);
         }else{
@@ -103,7 +104,7 @@ Command.prototype = {
     },
     toString: function(){
         var str = this.master.toString() + "->" + this.name;
-        if(this.args.length > 0)str += ":" + this.args.join(",");
+        if(this.args.length > 1)str += ":" + this.args.slice(0, 1).join(",");
         return str;
     }
 };
@@ -113,14 +114,13 @@ Command.getCmds = function(master, cmdStrs){
     return cmdStrs.split("\n").map(function(cmdStr){
         var cmd = new Command(master);
         cmd.parse(cmdStr);
-        cmd.exe();
-        // return cmd;
+        return cmd;
     });
 };
 
 module.exports = Command;
 
-},{"./util":8}],4:[function(require,module,exports){
+},{"./util":10}],4:[function(require,module,exports){
 var util = require('./util');
 var Pointer = require('./Pointer');
 
@@ -164,7 +164,66 @@ util.defineConstructor(Direction);
 
 module.exports = Direction;
 
-},{"./Pointer":5,"./util":8}],5:[function(require,module,exports){
+},{"./Pointer":7,"./util":10}],5:[function(require,module,exports){
+var util = require('./util');
+var MsgQue = require('./MsgQue');
+
+function Dispatcher() {
+    this.going = false;
+    this.mq = new MsgQue();
+}
+
+Dispatcher.prototype = {
+    bind: function (cmd) {
+        util.log(null, cmd, 'red');
+        this.mq.push(cmd);
+    },
+    detach: function (cmd) {
+        this.mq.del(cmd);
+    },
+    start: function () {
+        if (this.mq.size() > 0) this.mq.pop().exe(this);
+    },
+    stop: function () {
+        this.going = false;
+    }
+};
+util.defineConstructor(Dispatcher);
+
+module.exports = Dispatcher;
+
+},{"./MsgQue":6,"./util":10}],6:[function(require,module,exports){
+var util = require('./util');
+
+function MsgQue() {
+    this.msgs = [];
+}
+
+MsgQue.prototype = {
+    del: function(cmd) {
+        for (var i = 0; i < this.msgs.length; i++) {
+            if(cmd === this.msgs[i]){
+                this.msgs.splice(i, 1);
+                break;
+            }
+        }
+    },
+    push: function(cmd) {
+        this.msgs.push(cmd);
+    },
+    pop: function() {
+        return this.msgs.shift();
+    },
+    size: function() {
+        return this.msgs.length;
+    }
+};
+
+util.defineConstructor(MsgQue);
+
+module.exports = MsgQue;
+
+},{"./util":10}],7:[function(require,module,exports){
 var util = require('./util');
 
 function Pointer(x, y){
@@ -196,7 +255,7 @@ util.defineConstructor(Pointer);
 
 module.exports = Pointer;
 
-},{"./util":8}],6:[function(require,module,exports){
+},{"./util":10}],8:[function(require,module,exports){
 var Pointer = require('./Pointer');
 var Direction = require('./Direction');
 var Boundary = require('./Boundary');
@@ -218,42 +277,41 @@ function Robot(direction, pointer, runningSpeed, rotatingSpeed) {
 }
 
 Robot.prototype = {
-    go: function(step) {
+    go: function (step, dispatcher) {
         if (!step) step = 1;
         if (step > 0) {
-            this.updatePointerView(this.pointer.clone(), Math.abs(step) / this.runningSpeed, 1);
+            this.updatePointerView(this.pointer.clone(), Math.abs(step) / this.runningSpeed, 1, dispatcher);
         } else if (step < 0) {
             this.back(-step);
         }
     },
-    back: function(step) {
+    back: function (step, dispatcher) {
         if (!step) step = 1;
         if (step > 0) {
-            this.updatePointerView(this.pointer.clone(), Math.abs(step) / this.runningSpeed, -1);
+            this.updatePointerView(this.pointer.clone(), Math.abs(step) / this.runningSpeed, -1, dispatcher);
         } else if (step < 0) {
             this.go(-step);
         }
     },
     //逆时针旋转
-    turn: function() {
-        var arg = arguments[0];
-        if (!arg) arg = 90;
-        if (arg > 0) {
-            this.updateDirectionView(this.direction.clone(), Math.abs(arg) / this.rotatingSpeed, 1);
-        } else if (arg < 0) {
-            this.updateDirectionView(this.direction.clone(), Math.abs(arg) / this.rotatingSpeed, -1);
+    turn: function (angle, dispatcher) {
+        if (!angle) angle = 90;
+        if (angle > 0) {
+            this.updateDirectionView(this.direction.clone(), Math.abs(angle) / this.rotatingSpeed, 1, dispatcher);
+        } else if (angle < 0) {
+            this.updateDirectionView(this.direction.clone(), Math.abs(angle) / this.rotatingSpeed, -1, dispatcher);
         }
     },
-    turnRight: function() {
-        this.turn(-90);
+    turnRight: function (dispatcher) {
+        this.turn(-90, dispatcher);
     },
-    turnLeft: function() {
-        this.turn(90);
+    turnLeft: function (dispatcher) {
+        this.turn(90, dispatcher);
     },
-    turnBack: function() {
-        this.turn(180);
+    turnBack: function (dispatcher) {
+        this.turn(180, dispatcher);
     },
-    setView: function(id, imgSrc) {
+    setView: function (id, imgSrc) {
         this.view = util.createEle("img", {
             "id": id,
             "className": "robotView",
@@ -264,10 +322,9 @@ Robot.prototype = {
             }
         });
     },
-    updatePointerView: function(fromPointer, time, isPositive) {
+    updatePointerView: function (fromPointer, time, isPositive, dispatcher) {
         var start = null,
             that = this;
-
         function move(timestamp) {
             if (!start) start = timestamp;
             var progress = (timestamp - start).toFixed();
@@ -276,12 +333,13 @@ Robot.prototype = {
             that.view.style.left = util.getUnit(that.pointer.x);
             that.view.style.bottom = util.getUnit(that.pointer.y);
             if (progress < time) {
-                window.requestAnimationFrame(arguments.callee);
+                window.requestAnimationFrame(move);
+                dispatcher.start();
             }
         }
         window.requestAnimationFrame(move);
     },
-    updateDirectionView: function(fromDirection, time, isPositive) {
+    updateDirectionView: function (fromDirection, time, isPositive, dispatcher) {
         var start = null,
             that = this;
 
@@ -291,18 +349,19 @@ Robot.prototype = {
             that.direction = fromDirection.addAngle(Math.round(isPositive * progress * that.rotatingSpeed));
             that.view.style.transform = 'rotate(' + that.direction.forCSSRotation() + 'deg)';
             if (progress < time) {
-                window.requestAnimationFrame(arguments.callee);
+                window.requestAnimationFrame(rotate);
+                dispatcher.start();
             }
         }
         window.requestAnimationFrame(rotate);
     },
-    setBoundary: function(startPoint, endPoint) {
+    setBoundary: function (startPoint, endPoint) {
         this.boundary = new Boundary(startPoint, endPoint);
     },
-    getCmdMap: function() {
+    getCmdMap: function () {
         return Robot.CmdMap;
     },
-    toString: function(){
+    toString: function () {
         return 'Robot';
     }
 };
@@ -331,17 +390,21 @@ Robot.CmdMap = cm;
 
 module.exports = Robot;
 
-},{"./Boundary":2,"./Direction":4,"./Pointer":5,"./util":8}],7:[function(require,module,exports){
+},{"./Boundary":2,"./Direction":4,"./Pointer":7,"./util":10}],9:[function(require,module,exports){
 var Board = require('./Board');
 var Robot = require('./Robot');
 var Command = require('./Command');
 var Direction = require('./Direction');
 var Pointer = require('./Pointer');
+
+var Dispatcher = require('./Dispatcher');
 var util = require('./util');
 
 var board = new Board(10, 10);
 var robot = new Robot(new Direction(90), new Pointer(3, 4));
 board.drawRobot(robot);
+var dispatcher = new Dispatcher();
+
 util.append(document.body, board.createBoardView("board", 'url("./img/bg.png")'), 'left-top', 10, 10, true);
 
 util.append(document.body, util.createEle("button", {
@@ -380,7 +443,7 @@ function clickHandler(e) {
     var ele = e.target;
     var cmd = new Command(robot, ele.id);
     cmd.parse(ele.id + " " + ele.value);
-    cmd.exe();
+    dispatcher.bind(cmd);
 }
 
 util.append(document.body, util.createEle("div", {
@@ -404,12 +467,23 @@ util.append(document.body, util.createEle("textarea", {
 
 }), 'right-top', "320px", "10px");
 
+util.append(document.body, util.createEle("button", {
+    "id": "exe",
+    "className": "btn",
+    "onclick": function(){
+        dispatcher.start();
+    }
+}, "exe"), 'right-top', "350px", "140px");
+
 function keyHandler(e){
     if(e.ctrlKey && e.keyCode===13){
-        Command.getCmds(robot, e.target.value);
+        Command.getCmds(robot, e.target.value).forEach(function(cmd){
+            dispatcher.bind(cmd);
+        });
     }
 }
-},{"./Board":1,"./Command":3,"./Direction":4,"./Pointer":5,"./Robot":6,"./util":8}],8:[function(require,module,exports){
+
+},{"./Board":1,"./Command":3,"./Direction":4,"./Dispatcher":5,"./Pointer":7,"./Robot":8,"./util":10}],10:[function(require,module,exports){
 var util = {
     defineConstructor: function(ClassObject) {
         Object.defineProperty(ClassObject.prototype, 'constructor', {
@@ -539,4 +613,4 @@ var util = {
 
 module.exports = util;
 
-},{}]},{},[7]);
+},{}]},{},[9]);
