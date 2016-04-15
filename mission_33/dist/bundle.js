@@ -177,12 +177,15 @@ Dispatcher.prototype = {
     bind: function (cmd) {
         util.log(null, cmd, 'red');
         this.mq.push(cmd);
+        this.start();
     },
     detach: function (cmd) {
         this.mq.del(cmd);
+        this.start();
     },
     start: function () {
-        if (this.mq.size() > 0) this.mq.pop().exe(this);
+        this.going = true;
+        if (this.going && this.mq.size() > 0) this.mq.pop().exe(this);
     },
     stop: function () {
         this.going = false;
@@ -334,6 +337,7 @@ Robot.prototype = {
             that.view.style.bottom = util.getUnit(that.pointer.y);
             if (progress < time) {
                 window.requestAnimationFrame(move);
+            }else{
                 dispatcher.start();
             }
         }
@@ -349,7 +353,8 @@ Robot.prototype = {
             that.direction = fromDirection.addAngle(Math.round(isPositive * progress * that.rotatingSpeed));
             that.view.style.transform = 'rotate(' + that.direction.forCSSRotation() + 'deg)';
             if (progress < time) {
-                window.requestAnimationFrame(rotate);
+                window.requestAnimationFrame(rotate);                
+            }else{
                 dispatcher.start();
             }
         }

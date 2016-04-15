@@ -76,6 +76,7 @@ Robot.prototype = {
             that.view.style.bottom = util.getUnit(that.pointer.y);
             if (progress < time) {
                 window.requestAnimationFrame(move);
+            }else{
                 dispatcher.start();
             }
         }
@@ -91,7 +92,8 @@ Robot.prototype = {
             that.direction = fromDirection.addAngle(Math.round(isPositive * progress * that.rotatingSpeed));
             that.view.style.transform = 'rotate(' + that.direction.forCSSRotation() + 'deg)';
             if (progress < time) {
-                window.requestAnimationFrame(rotate);
+                window.requestAnimationFrame(rotate);                
+            }else{
                 dispatcher.start();
             }
         }
