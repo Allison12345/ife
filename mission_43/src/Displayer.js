@@ -1,11 +1,12 @@
-function Displayer(width, height, count) {
+function Displayer(width, height, imgs) {
     this.width = width;
     this.height = height;
-    this.count = count;
+    this.imgs = imgs;
 }
 
 Displayer.prototype = {
-    show: function (images) {
+    show: function () {
+        var images = this.imgs;
         switch (images.length) {
             case 1: this.drawOne(images); break;
             case 2: this.drawTwo(images); break;
@@ -13,7 +14,7 @@ Displayer.prototype = {
             case 4: this.drawFour(images); break;
             case 5: this.drawFive(images); break;
             case 6: this.drawSix(images); break;
-            default: this.drawSix(images.slice(0, 6)); 
+            default: this.drawSix(images.slice(0, 6));
         }
     },
     display: function () {
