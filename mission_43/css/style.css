@@ -1,40 +1,39 @@
-html, body, div{
+html,
+body,
+div {
     margin: 0;
-    padding: 0;   
+    padding: 0;
 }
 
-div.one{
-    
+div.container{
+    margin: 10px;
+    background-color: orchid;
 }
 
-div.two{
-    
+.one {
+    width: 100%;
+    height: 100%;
 }
 
-div.three{
-    
+.loading {
+    opacity: .8;
+    display: block;
+    border-radius: 50%;
+    font-size: 29px;
+    width: .25em;
+    height: .25em;
+    box-shadow: 0 -.4em 0 0 rgba(104, 216, 251, 1), -.28em -.28em 0 0 rgba(104, 216, 251, 0.75), -.4em 0 0 0 rgba(104, 216, 251, 0.5), -.28em .28em 0 0 rgba(104, 216, 251, 0.25);
+    animation: .85s ajax-loader-rotate steps(8) infinite;
+}
+@keyframes ajax-loader-rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
-div.four{
-    
-}
-
-div.five{
-    
-}
-
-div.six{
-    
-}
-
-div.seven{
-    
-}
-
-div.eight{
-    
-}
-
-div.nine{
+.error {
     
 }
