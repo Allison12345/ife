@@ -2,11 +2,18 @@ function Displayer(width, height, imgs) {
     this.width = width;
     this.height = height;
     this.imgs = imgs;
+    var div = document.createElement("div");
+    div.style.width = this.width;
+    div.style.height = this.height;
+    this.frame = div;
 }
 
 Displayer.prototype = {
     show: function () {
         var images = this.imgs;
+        for(var i = 0; i < images.length; i++){
+            this.frame.appendChild(images[i]);
+        }
         switch (images.length) {
             case 1: this.drawOne(images); break;
             case 2: this.drawTwo(images); break;
@@ -17,12 +24,8 @@ Displayer.prototype = {
             default: this.drawSix(images.slice(0, 6));
         }
     },
-    display: function () {
-        var div = document.createElement("div");
-        return div;
-    },
     drawOne: function (imgs) {
-
+        
     },
     drawTwo: function (imgs) {
 
