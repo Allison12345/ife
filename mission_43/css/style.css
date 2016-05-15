@@ -15,6 +15,11 @@ div.container{
     height: 100%;
 }
 
+.two {
+    width: 50%;
+    height: 100%;
+}
+
 .loading {
     opacity: .8;
     display: block;

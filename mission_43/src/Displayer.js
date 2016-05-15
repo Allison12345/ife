@@ -38,19 +38,34 @@ Displayer.prototype = {
             this.frame.appendChild(util.createEle("div", "error"));
         });
     },
-    drawTwo: function (imgs) {
+    drawTwo: function (imgUrls) {
+        var loadingDivs = [];
+        for (var i = 0; i < imgUrls.length; i++) {
+            loadingDivs[i] = util.createEle("div", "loading");
+            this.frame.appendChild(loadingDivs[i]);
+            util.fetch(imgUrls[i], (data) => {
+                this.frame.removeChild(loadingDivs[i]);
+                var arrayBufferView = new Uint8Array(data);
+                var blob = new Blob([arrayBufferView], { type: "image/png" });
+                var img = util.createEle("img", "two");
+                img.src = URL.createObjectURL(blob);
+                this.frame.appendChild(img);
+            }, () => {
+                this.frame.removeChild(loadingDivs[i]);
+                this.frame.appendChild(util.createEle("div", "error"));
+            });
+        }
+    },
+    drawThree: function (imgUrls) {
 
     },
-    drawThree: function (imgs) {
+    drawFour: function (imgUrls) {
 
     },
-    drawFour: function (imgs) {
+    drawFive: function (imgUrls) {
 
     },
-    drawFive: function (imgs) {
-
-    },
-    drawSix: function (imgs) {
+    drawSix: function (imgUrls) {
 
     }
 };

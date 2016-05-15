@@ -39,19 +39,34 @@ Displayer.prototype = {
             this.frame.appendChild(util.createEle("div", "error"));
         });
     },
-    drawTwo: function (imgs) {
+    drawTwo: function (imgUrls) {
+        var loadingDivs = [];
+        for (var i = 0; i < imgUrls.length; i++) {
+            loadingDivs[i] = util.createEle("div", "loading");
+            this.frame.appendChild(loadingDivs[i]);
+            util.fetch(imgUrls[i], (data) => {
+                this.frame.removeChild(loadingDivs[i]);
+                var arrayBufferView = new Uint8Array(data);
+                var blob = new Blob([arrayBufferView], { type: "image/png" });
+                var img = util.createEle("img", "two");
+                img.src = URL.createObjectURL(blob);
+                this.frame.appendChild(img);
+            }, () => {
+                this.frame.removeChild(loadingDivs[i]);
+                this.frame.appendChild(util.createEle("div", "error"));
+            });
+        }
+    },
+    drawThree: function (imgUrls) {
 
     },
-    drawThree: function (imgs) {
+    drawFour: function (imgUrls) {
 
     },
-    drawFour: function (imgs) {
+    drawFive: function (imgUrls) {
 
     },
-    drawFive: function (imgs) {
-
-    },
-    drawSix: function (imgs) {
+    drawSix: function (imgUrls) {
 
     }
 };
@@ -66,10 +81,11 @@ module.exports = Displayer;
 var util = require('./util');
 var Displayer = require('./Displayer');
 
-var count = 1;
-
-for(var i = 1; i <= count; i++){
-    document.body.appendChild(new Displayer(240, 180, util.getimgs(i, 16, './imgsbed/')).show());
+var count = 2,
+    baseUrl = "http://7xq0r0.com1.z0.glb.clouddn.com/m43_imgsbed/";
+    
+for (var i = 1; i <= count; i++) {
+    document.body.appendChild(new Displayer(240 * i, 180 * i, util.getimgs(i, 16, baseUrl)).show());
 }
 },{"./Displayer":1,"./util":3}],3:[function(require,module,exports){
 module.exports = {
