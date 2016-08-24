@@ -1,17 +1,11 @@
 body{
 	background: url('../images/bg.jpg');
 }
-
 #pageContain{
     overflow: hidden;
 }
 
 .page {
-    background-clip: border-box;
-    background-position: center;
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
     display: none;
     width: 100%;
     height: 100%;
