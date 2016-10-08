@@ -1,0 +1,22 @@
+div, p {
+    padding: 0;
+    margin: 0;
+}
+
+.robotView {
+    border-radius: 50%;
+}
+
+.logger {
+    overflow: auto;
+    background: black;
+}
+
+.cmdarea {
+    overflow: auto;
+}
+
+.btn {
+    width: 80px;
+    height: 25px;
+}
